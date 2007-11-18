@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="10dip"
+    >
+    
+	<TextView  
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content" 
+	    android:text="Enter RSS URL:"
+	    />
+	<EditText id="@+id/url"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="http://"
+		android:singleLine="true"
+		/>
+		
+	<TextView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="Enter feed name:"
+		/>
+		
+		<EditText id="@+id/name"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:singleLine="true"
+			/>
+		
+		<Button id="@+id/download"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Download Name"
+			/>
+			
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:paddingTop="8dip"
+		android:gravity="center_horizontal">
+		
+		<Button id="@+id/add"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Add"
+			/>
+	
+	</LinearLayout>
+			
+</LinearLayout>
