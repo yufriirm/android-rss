@@ -105,8 +105,6 @@ public class RSSChannelAdd extends Activity
 					
 					try
 					{
-						/* TODO: Validate with easy-to-figure local rules before
-						 *  we ask to hit the network. */				
 						mFeedName = getTitleFromFeed(new URL(urlStr));
 					}
 					catch(Exception e)

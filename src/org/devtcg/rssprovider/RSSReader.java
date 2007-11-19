@@ -28,7 +28,10 @@ public final class RSSReader
 		public static final ContentURI CONTENT_URI = 
 			ContentURI.create("content://org.devtcg.rssprovider.RSSReader/posts");
 		
-		public static final String DEFAULT_SORT_ORDER = "date DESC";
+		public static final ContentURI CONTENT_URI_LIST =
+			ContentURI.create("content://org.devtcg.rssprovider.RSSReader/postlist");
+		
+		public static final String DEFAULT_SORT_ORDER = "posted_on DESC";
 		
 		/* Reference to the channel _ID to which this post belongs. */
 		public static final String CHANNEL_ID = "channel_id";
@@ -46,6 +49,6 @@ public final class RSSReader
 		public static final String BODY = "body";
 	
 		/* Date of the post. */
-		public static final String DATE = "posted";
+		public static final String DATE = "posted_on";
 	}
 }
