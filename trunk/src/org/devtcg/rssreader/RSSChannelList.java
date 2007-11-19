@@ -8,6 +8,9 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.devtcg.rssprovider.RSSReader;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -15,14 +18,19 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.ContentURI;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.View;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 public class RSSChannelList extends ListActivity {
@@ -35,7 +43,26 @@ public class RSSChannelList extends ListActivity {
 	
     private static final String[] PROJECTION = new String[] {
     	RSSReader.Channels._ID, RSSReader.Channels.TITLE, RSSReader.Channels.URL };
-	
+    
+    /* Special handler that can capture progress messages to report back to this GUI. */
+	protected ProgressDialog mRefreshBusy;	
+	final Handler mRefreshHandler = new Handler()
+    {
+    	public void handleMessage(Message msg)
+    	{
+    		if (msg.arg1 == 0xDEADBEEF)
+    		{
+    			Log.i("RSSChannelList", "Got DEADBEEF");
+    			mRefreshBusy.dismiss();
+    		}
+    		else
+    		{
+    			String qName = (String)msg.obj;
+        		Log.d("RSSChannelList", "Got a message: " + qName);
+    		}
+    	}
+    };
+    
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -43,7 +70,10 @@ public class RSSChannelList extends ListActivity {
         Intent intent = getIntent();
         if (intent.getData() == null)
             intent.setData(RSSReader.Channels.CONTENT_URI);
-
+        
+        if (intent.getAction() == null)
+        	intent.setAction(Intent.VIEW_ACTION);
+        
         mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null);
         
         ListAdapter adapter = new SimpleCursorAdapter(this,
@@ -96,6 +126,24 @@ public class RSSChannelList extends ListActivity {
     }
     
     @Override
+    protected void onListItemClick(ListView l, View v, int position, long id)
+    {
+    	String action = getIntent().getAction();
+    	
+    	if (action.equals(Intent.PICK_ACTION) ||
+    	    action.equals(Intent.GET_CONTENT_ACTION))
+    	{
+    		ContentURI uri = getIntent().getData().addId(getSelectionRowID());
+    		setResult(RESULT_OK, uri.toString());
+    	}
+    	else
+    	{
+    		ContentURI uri = RSSReader.Posts.CONTENT_URI_LIST.addId(getSelectionRowID());
+    		startActivity(new Intent(Intent.VIEW_ACTION, uri));
+    	}
+    }
+    
+    @Override
     public boolean onOptionsItemSelected(Menu.Item item)
     {
     	switch(item.getId())
@@ -105,8 +153,7 @@ public class RSSChannelList extends ListActivity {
     		return true;
     		
     	case DELETE_ID:
-    		mCursor.moveTo(getSelection());
-    		mCursor.deleteRow();
+    		deleteChannel();
     		return true;
     		
     	case REFRESH_ID:
@@ -117,34 +164,51 @@ public class RSSChannelList extends ListActivity {
     	return super.onOptionsItemSelected(item);
     }
     
+    private final void deleteChannel()
+    {
+    	String channelId;
+    	
+		mCursor.moveTo(getSelection());
+		
+		channelId = mCursor.getString
+		  (mCursor.getColumnIndex(RSSReader.Channels._ID));
+
+		/* Delete related posts. */
+		getContentResolver().delete(RSSReader.Posts.CONTENT_URI,
+    			"channel_id=?", new String[] { channelId });
+
+		mCursor.deleteRow();
+    }
+    
     private final void refreshChannel()
     {
     	mCursor.moveTo(getSelection());    	
-    	String rssurl = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels.URL));
     	
-    	XMLReader xr;
-		try {
-			xr = XMLReaderFactory.createXMLReader();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			Log.e("Test2", e.getMessage());
-			return;
-		}
-		
-    	RSSChannelRefresh test = new RSSChannelRefresh();
-    	xr.setContentHandler(test);
-    	xr.setErrorHandler(test);
+    	final String id = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels._ID));
+    	final String rssurl = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels.URL));
     	
-    	try
+    	/* TODO: Replace with an interface that does not block the user from
+    	 * continuing to use the program to access existing feed posts. */
+    	mRefreshBusy = ProgressDialog.show(this,
+    		"Downloading", "Synchronizing new RSS posts...", true, false);
+ 
+    	Thread t = new Thread()
     	{
-    		URL url = new URL(rssurl);
-    		xr.parse(new InputSource(new InputStreamReader(url.openStream())));
-    	}
-    	catch (Exception e)
-    	{
-    		Log.e("Test", e.getMessage());
-    	}
+    		public void run()
+    		{
+    			Log.e("RSSChannelList", "Here we go: " + rssurl + "...");
+    			
+    	    	new RSSChannelRefresh(getContentResolver()).
+    	    	  syncDB(mRefreshHandler, id, rssurl);
+    	    	
+    	    	Message done = mRefreshHandler.obtainMessage();
+    	    	done.arg1 = 0xDEADBEEF;
+    	    	mRefreshHandler.sendMessage(done);
+    	    	
+    	    	Log.i("RSSChannelList", "Sent 0xDEADBEEF");
+       		}
+    	};
     	
-    	Log.i("Test", rssurl);
+    	t.start();
     }
 }
