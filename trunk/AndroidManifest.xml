@@ -11,6 +11,10 @@
                 <category android:value="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
+                <action android:value="android.intent.action.MAIN" />
+                <category android:value="android.intent.category.HOME" />
+            </intent-filter>
+            <intent-filter>
             	<action android:value="android.intent.action.VIEW" />
             	<action android:value="android.intent.action.PICK" />
             	<action android:value="android.intent.action.EDIT" />
@@ -25,6 +29,14 @@
                 <category android:value="android.intent.category.DEFAULT" />
                 <type android:value="vnd.android.cursor.dir/vnd.rssreader.channel" />
             </intent-filter>
+        </activity>
+        
+        <activity class="RSSPostList" android:label="@string/app_name">
+        	<intent-filter android:label="View RSS channel">
+        		<action android:value="android.intent.action.VIEW" />
+        		<category android:value="android.intent.category.DEFAULT" />
+        		<type android:value="vnd.android.cursor.dir/vnd.rssreader.post" />
+        	</intent-filter>
         </activity>
         
     </application>
