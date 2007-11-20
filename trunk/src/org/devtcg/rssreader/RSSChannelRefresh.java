@@ -89,7 +89,7 @@ public class RSSChannelRefresh extends DefaultHandler
 		catch (Exception e)
 		{
 			Log.e(TAG, e.getMessage());
-		}			
+		}
 	}
 
 	public void startElement(String uri, String name, String qName,

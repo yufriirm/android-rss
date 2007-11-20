@@ -9,8 +9,11 @@ import org.devtcg.rssprovider.RSSReader;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.ContentURI;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 public class RSSPostList extends ListActivity
@@ -32,4 +35,21 @@ public class RSSPostList extends ListActivity
                 new String[] { RSSReader.Posts.TITLE }, new int[] { android.R.id.text1 });
         setListAdapter(adapter);
 	}
+	
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id)
+    {
+		ContentURI uri = RSSReader.Posts.CONTENT_URI.addId(getSelectionRowID());
+    	String action = getIntent().getAction();
+    	
+    	if (action.equals(Intent.PICK_ACTION) ||
+    	    action.equals(Intent.GET_CONTENT_ACTION))
+    	{
+    		setResult(RESULT_OK, uri.toString());
+    	}
+    	else
+    	{
+    		startActivity(new Intent(Intent.VIEW_ACTION, uri));
+    	}
+    }
 }
