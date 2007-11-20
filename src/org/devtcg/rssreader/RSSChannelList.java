@@ -19,6 +19,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.ContentURI;
@@ -29,6 +30,9 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
+import android.widget.CursorAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -52,7 +56,7 @@ public class RSSChannelList extends ListActivity {
     	{
     		if (msg.arg1 == 0xDEADBEEF)
     		{
-    			Log.i("RSSChannelList", "Got DEADBEEF");
+    			Log.i("RSSChannelList", "Got 0xDEADBEEF");
     			mRefreshBusy.dismiss();
     		}
     		else
@@ -75,6 +79,8 @@ public class RSSChannelList extends ListActivity {
         	intent.setAction(Intent.VIEW_ACTION);
         
         mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null);
+        
+//        ListAdapter adapter = new RSSChannelListAdapter(mCursor, this);
         
         ListAdapter adapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_list_item_1, mCursor,
