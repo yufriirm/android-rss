@@ -36,6 +36,9 @@ public final class RSSReader
 		/* Reference to the channel _ID to which this post belongs. */
 		public static final String CHANNEL_ID = "channel_id";
 		
+		/* Boolean read value. */
+		public static final String READ = "read"; 
+		
 		/* Post subject. */
 		public static final String TITLE = "title";
 		

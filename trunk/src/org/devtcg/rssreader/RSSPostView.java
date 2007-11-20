@@ -17,8 +17,8 @@ import android.widget.TextView;
 public class RSSPostView extends Activity
 {
 	private static final String[] PROJECTION = new String[] {
-		RSSReader.Posts._ID, RSSReader.Posts.TITLE, RSSReader.Posts.BODY,
-		RSSReader.Posts.CHANNEL_ID };
+		RSSReader.Posts._ID, RSSReader.Posts.CHANNEL_ID,
+		RSSReader.Posts.TITLE, RSSReader.Posts.BODY, RSSReader.Posts.READ };
 	
 	@Override
 	protected void onCreate(Bundle icicle)
@@ -43,6 +43,10 @@ public class RSSPostView extends Activity
 		 * get us here with no real data? */
 		assert(cPost.count() == 1);
 		cPost.first();
+		
+		/* Set the post to read. */
+		cPost.updateInt(cPost.getColumnIndex(RSSReader.Posts.READ), 1);
+		cPost.commitUpdates();
 		
 		/* Resolve the channel title by CHANNEL_ID. */
 		long channelId = new Long

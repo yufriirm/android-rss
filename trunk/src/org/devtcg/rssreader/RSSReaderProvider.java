@@ -26,7 +26,7 @@ public class RSSReaderProvider extends ContentProvider {
 	
 	private static final String TAG = "RSSReaderProvider";
 	private static final String DATABASE_NAME = "rss_reader.db";
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	
 	private static HashMap<String, String> CHANNEL_LIST_PROJECTION_MAP;
 	private static HashMap<String, String> POST_LIST_PROJECTION_MAP;
@@ -48,7 +48,8 @@ public class RSSReaderProvider extends ContentProvider {
 			           "	title TEXT UNIQUE, url TEXT UNIQUE);");
 			
 			db.execSQL("CREATE TABLE rssreader_post (_id INTEGER PRIMARY KEY," +
-			           "    channel_id INTEGER, title TEXT, url TEXT, posted_on DATETIME, body TEXT, author TEXT);");
+			           "    channel_id INTEGER, title TEXT, url TEXT, " + 
+			           "    posted_on DATETIME, body TEXT, author TEXT, read INTEGER(1));");
 
 			/* TODO: Should we narrow this more to just URL _or_ title? */
 			db.execSQL("CREATE UNIQUE INDEX unq_post ON rssreader_post (title, url);");
@@ -296,6 +297,7 @@ public class RSSReaderProvider extends ContentProvider {
 		POST_LIST_PROJECTION_MAP = new HashMap<String, String>();
 		POST_LIST_PROJECTION_MAP.put(RSSReader.Posts._ID, "_id");
 		POST_LIST_PROJECTION_MAP.put(RSSReader.Posts.CHANNEL_ID, "channel_id");
+		POST_LIST_PROJECTION_MAP.put(RSSReader.Posts.READ, "read");
 		POST_LIST_PROJECTION_MAP.put(RSSReader.Posts.TITLE, "title");
 		POST_LIST_PROJECTION_MAP.put(RSSReader.Posts.URL, "url");
 		POST_LIST_PROJECTION_MAP.put(RSSReader.Posts.AUTHOR, "author");
