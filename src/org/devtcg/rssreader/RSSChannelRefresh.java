@@ -1,5 +1,8 @@
 /*
  * $Id$
+ * 
+ * TODO: This class needs to be generalized much better, with specialized
+ * parsers for Atom 1.0, Atom 0.3, RSS 0.91, RSS 1.0 and RSS 2.0.
  */
 
 package org.devtcg.rssreader;
@@ -45,8 +48,8 @@ public class RSSChannelRefresh extends DefaultHandler
 	private static final int STATE_IN_ITEM_TITLE = (1 << 3);
 	private static final int STATE_IN_ITEM_LINK = (1 << 4);
 	private static final int STATE_IN_ITEM_DESC = (1 << 5);
-	private static final int STATE_IN_ITEM_DCDATE = (1 << 6);
-	private static final int STATE_IN_ITEM_DCAUTHOR = (1 << 7);
+	private static final int STATE_IN_ITEM_DATE = (1 << 6);
+	private static final int STATE_IN_ITEM_AUTHOR = (1 << 7);
 	
 	private static HashMap<String, Integer> mStateMap;
 	
@@ -54,11 +57,15 @@ public class RSSChannelRefresh extends DefaultHandler
 	{
 		mStateMap = new HashMap<String, Integer>();		
 		mStateMap.put("item", new Integer(STATE_IN_ITEM));
+		mStateMap.put("entry", new Integer(STATE_IN_ITEM));
 		mStateMap.put("title", new Integer(STATE_IN_ITEM_TITLE));
 		mStateMap.put("link", new Integer(STATE_IN_ITEM_LINK));
 		mStateMap.put("description", new Integer(STATE_IN_ITEM_DESC));
-		mStateMap.put("dc:date", new Integer(STATE_IN_ITEM_DCDATE));
-		mStateMap.put("dc:author", new Integer(STATE_IN_ITEM_DCAUTHOR));
+		mStateMap.put("content", new Integer(STATE_IN_ITEM_DESC));
+		mStateMap.put("dc:date", new Integer(STATE_IN_ITEM_DATE));
+		mStateMap.put("updated", new Integer(STATE_IN_ITEM_DATE));
+		mStateMap.put("dc:author", new Integer(STATE_IN_ITEM_AUTHOR));
+		mStateMap.put("author", new Integer(STATE_IN_ITEM_AUTHOR));
 	}
 
 	public RSSChannelRefresh(ContentResolver resolver)
@@ -88,7 +95,12 @@ public class RSSChannelRefresh extends DefaultHandler
 		}
 		catch (Exception e)
 		{
-			Log.e(TAG, e.getMessage());
+			String msg = e.getMessage();
+			
+			if (msg != null)
+				Log.e(TAG, e.getMessage());
+			else
+				Log.e(TAG, "what the hell?");
 		}
 	}
 
@@ -96,13 +108,20 @@ public class RSSChannelRefresh extends DefaultHandler
 			Attributes attrs)
 	{
 		Integer state = mStateMap.get(qName);
-		
+
 		if (state != null)
 		{
 			mState |= state.intValue();
 
 			if (state.intValue() == STATE_IN_ITEM)
 				mPostBuf = new RSSChannelPost();
+			else if ((mState & STATE_IN_ITEM) != 0 && state.intValue() == STATE_IN_ITEM_LINK)
+			{
+				String href = attrs.getValue("href");
+				
+				if (href != null)
+					mPostBuf.link = href;
+			}
 		}
 	}
 
@@ -166,10 +185,10 @@ public class RSSChannelRefresh extends DefaultHandler
 		case STATE_IN_ITEM | STATE_IN_ITEM_LINK:
 			mPostBuf.link = new String(ch, start, length);
 			break;
-		case STATE_IN_ITEM | STATE_IN_ITEM_DCDATE:
+		case STATE_IN_ITEM | STATE_IN_ITEM_DATE:
 			mPostBuf.date = new String(ch, start, length);
 			break;
-		case STATE_IN_ITEM | STATE_IN_ITEM_DCAUTHOR:
+		case STATE_IN_ITEM | STATE_IN_ITEM_AUTHOR:
 			mPostBuf.author = new String(ch, start, length);
 			break;
 		default:

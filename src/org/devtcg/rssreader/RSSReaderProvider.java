@@ -26,7 +26,7 @@ public class RSSReaderProvider extends ContentProvider {
 	
 	private static final String TAG = "RSSReaderProvider";
 	private static final String DATABASE_NAME = "rss_reader.db";
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 6;
 	
 	private static HashMap<String, String> CHANNEL_LIST_PROJECTION_MAP;
 	private static HashMap<String, String> POST_LIST_PROJECTION_MAP;
@@ -41,15 +41,17 @@ public class RSSReaderProvider extends ContentProvider {
 	
 	private static class DatabaseHelper extends ContentProviderDatabaseHelper
 	{
-		@Override
-		public void onCreate(SQLiteDatabase db)
+		protected void onCreateChannels(SQLiteDatabase db)
 		{
 			db.execSQL("CREATE TABLE rssreader_channel (_id INTEGER PRIMARY KEY," +
-			           "	title TEXT UNIQUE, url TEXT UNIQUE);");
-			
+	           "	title TEXT UNIQUE, url TEXT UNIQUE, icon BLOB, logo BLOB);");
+		}
+		
+		protected void onCreatePosts(SQLiteDatabase db)
+		{
 			db.execSQL("CREATE TABLE rssreader_post (_id INTEGER PRIMARY KEY," +
 			           "    channel_id INTEGER, title TEXT, url TEXT, " + 
-			           "    posted_on DATETIME, body TEXT, author TEXT, read INTEGER(1));");
+			           "    posted_on DATETIME, body TEXT, author TEXT, read INTEGER(1) DEFAULT '0');");
 
 			/* TODO: Should we narrow this more to just URL _or_ title? */
 			db.execSQL("CREATE UNIQUE INDEX unq_post ON rssreader_post (title, url);");
@@ -59,12 +61,43 @@ public class RSSReaderProvider extends ContentProvider {
 		}
 		
 		@Override
+		public void onCreate(SQLiteDatabase db)
+		{
+			onCreateChannels(db);
+			onCreatePosts(db);
+		}
+		
+		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 		{
-			Log.w(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion + ", which will destroy all old data");
-			db.execSQL("DROP TABLE IF EXISTS rssreader_channel;");
-			db.execSQL("DROP TABLE IF EXISTS rssreader_post;");
-			onCreate(db);
+			assert(newVersion == DATABASE_VERSION);
+			Log.w(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion + "...");
+			
+			switch(oldVersion)
+			{
+			/* This doesn't work, and I don't know why... */
+			case 4:
+				/* All we did was add a DEFAULT clause to the read field, 
+				 * but SQLite3 does not support column alteration. */
+				db.execSQL("UPDATE rssreader_post SET read = 0 WHERE (read IS NULL OR read != 1);");
+				db.execSQL("ALTER TABLE rssreader_post RENAME TO rssreader_post_tmp;");
+				onCreatePosts(db);
+				db.execSQL("INSERT INTO rssreader_post SELECT * FROM rssreader_post_tmp;");
+				db.execSQL("DROP TABLE rssreader_post_tmp;");
+				break;
+				
+			case 5:
+				db.execSQL("ALTER TABLE rssreader_channel ADD COLUMN icon BLOB;");
+				db.execSQL("ALTER TABLE rssreader_channel ADD COLUMN logo BLOB;");
+				break;
+				
+			default:
+				Log.w(TAG, "Version too old, wiping out database contents...");
+				db.execSQL("DROP TABLE IF EXISTS rssreader_channel;");
+				db.execSQL("DROP TABLE IF EXISTS rssreader_post;");
+				onCreate(db);
+				break;
+			}
 		}
 	}
 	
@@ -293,6 +326,8 @@ public class RSSReaderProvider extends ContentProvider {
 		CHANNEL_LIST_PROJECTION_MAP.put(RSSReader.Channels._ID, "_id");
 		CHANNEL_LIST_PROJECTION_MAP.put(RSSReader.Channels.TITLE, "title");
 		CHANNEL_LIST_PROJECTION_MAP.put(RSSReader.Channels.URL, "url");
+		CHANNEL_LIST_PROJECTION_MAP.put(RSSReader.Channels.ICON, "icon");
+		CHANNEL_LIST_PROJECTION_MAP.put(RSSReader.Channels.LOGO, "logo");
 		
 		POST_LIST_PROJECTION_MAP = new HashMap<String, String>();
 		POST_LIST_PROJECTION_MAP.put(RSSReader.Posts._ID, "_id");

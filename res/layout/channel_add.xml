@@ -14,7 +14,7 @@
 	<EditText id="@+id/url"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:text="http://"
+		android:text="http://www.smartphonethoughts.com/xml"
 		android:singleLine="true"
 		/>
 		
@@ -30,11 +30,29 @@
 			android:singleLine="true"
 			/>
 		
-		<Button id="@+id/download"
+		<Button id="@+id/download_name"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="Download Name"
 			/>
+			
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		>
+		
+		<ImageView id="@+id/icon"
+			android:layout_width="16px"
+			android:layout_height="16px"
+			/>
+		
+		<Button id="@+id/download_icon"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Download Icon"
+			/>
+			
+	</LinearLayout>
 			
 	<LinearLayout
 		android:layout_width="fill_parent"

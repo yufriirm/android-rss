@@ -6,7 +6,9 @@ package org.devtcg.rssreader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,6 +18,8 @@ import org.devtcg.rssprovider.RSSReader;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ContentURI;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,11 +28,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 public class RSSChannelAdd extends Activity
 {
 	public EditText mTitleText;
 	public EditText mURLText;
+	public ImageView mIcon;
 	
 	/* We need this to not block when accessing the RSS feed for validation
 	 * and for name downloads. */
@@ -56,6 +62,20 @@ public class RSSChannelAdd extends Activity
 		}
 	};
 	
+	public Bitmap mIconData;
+	private Runnable mSetIcon = new Runnable()
+	{
+		public void run()
+		{
+			mBusy.dismiss();
+			
+			if (mIconData != null)
+				mIcon.setImageBitmap(mIconData);
+			else
+				mIcon.setImageResource(R.drawable.feedicon);
+		}
+	};
+	
 	@Override
 	public void onCreate(Bundle icicle)
 	{
@@ -64,9 +84,15 @@ public class RSSChannelAdd extends Activity
 		
 		mTitleText = (EditText)findViewById(R.id.name);
 		mURLText = (EditText)findViewById(R.id.url);
+		mIcon = (ImageView)findViewById(R.id.icon);
 		
-		Button download = (Button)findViewById(R.id.download);
-		download.setOnClickListener(mDownloadListener);
+		mIcon.setImageResource(R.drawable.feedicon);
+		
+		Button downloadIcon = (Button)findViewById(R.id.download_icon);
+		downloadIcon.setOnClickListener(mDownloadIconListener);
+		
+		Button downloadName = (Button)findViewById(R.id.download_name);
+		downloadName.setOnClickListener(mDownloadNameListener);
 		
 		Button add = (Button)findViewById(R.id.add);
 		add.setOnClickListener(mAddListener);
@@ -79,7 +105,10 @@ public class RSSChannelAdd extends Activity
 			ContentValues values = new ContentValues();
 			values.put(RSSReader.Channels.TITLE, mTitleText.getText().toString());
 			values.put(RSSReader.Channels.URL, mURLText.getText().toString());
-			
+
+			if (mIconData != null)
+				values.put(RSSReader.Channels.ICON, mIconData.toString());
+
 			ContentURI uri = getContentResolver().insert(getIntent().getData(), values);
 			setResult(RESULT_OK, uri.toString());
 			
@@ -87,7 +116,55 @@ public class RSSChannelAdd extends Activity
 		}
 	};
 	
-	private OnClickListener mDownloadListener = new OnClickListener()
+	private OnClickListener mDownloadIconListener = new OnClickListener()
+	{
+		public void onClick(View v)
+		{
+			mIconData = null;
+			
+			mBusy = ProgressDialog.show(RSSChannelAdd.this,
+			  "Downloading", "Accessing feed icon...", true, false);
+			
+			Thread t = new Thread()
+			{
+				public void run()
+				{
+					try
+					{
+						URL fullUrl = new URL(mURLText.getText().toString());
+						URL iconUrl = 
+						  new URL(fullUrl.getProtocol(), 
+						    fullUrl.getHost(), fullUrl.getPort(),
+						    "/favicon.ico");
+						
+						Log.d("RSSChannelAdd", "Fetching: " + iconUrl.toString() + "...");
+						
+						/* TODO: Harrass Google to fix this.  It just
+						 * won't work and there's no good reason why not. */
+						mIconData = BitmapFactory.decodeStream(iconUrl.openStream());
+						
+						if (mIconData == null)
+							Log.d("RSSChannelAdd", "TODO: Harrass Google about this bug!");
+						else
+							Log.d("RSSChannelAdd", "Sweet, bug fixed!");
+					}
+					catch (Exception e)
+					{						
+						/* TODO: Do something... */
+						Log.d("RSSChannelAdd", "Bollocks", e);
+					}
+					finally
+					{
+						mHandler.post(mSetIcon);
+					}
+				}
+			};
+			
+			t.start();
+		}
+	};
+	
+	private OnClickListener mDownloadNameListener = new OnClickListener()
 	{
 		public void onClick(View v)
 		{
@@ -95,7 +172,7 @@ public class RSSChannelAdd extends Activity
 			mFeedNameError = null;
 			
 			mBusy = ProgressDialog.show(RSSChannelAdd.this,
-				"Downloading", "Accessing RSS feed...", true, false);
+			  "Downloading", "Accessing feed XML...", true, false);
 			
 			Thread t = new Thread()
 			{
