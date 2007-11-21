@@ -21,6 +21,12 @@ public final class RSSReader
 		
 		/* RSS Feed URL. */
 		public static final String URL = "url";
+		
+		/* Site's favicon; usually a guess. */
+		public static final String ICON = "icon";
+		
+		/* Site's formal logo; derived from the XML feed. */
+		public static final String LOGO = "logo";
 	}
 	
 	public static final class Posts implements BaseColumns
