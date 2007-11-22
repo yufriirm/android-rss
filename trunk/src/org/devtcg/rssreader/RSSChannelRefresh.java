@@ -7,12 +7,16 @@
 
 package org.devtcg.rssreader;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.devtcg.rssprovider.RSSReader;
 import org.xml.sax.XMLReader;
 import org.xml.sax.Attributes;
@@ -74,6 +78,80 @@ public class RSSChannelRefresh extends DefaultHandler
 		
 		mContent = resolver;
 	}
+	
+	/*
+	 * Simple wrapper class that shows how much data is being read, 
+	 * as it's being read.  This enables us to create a ProgressBar
+	 * experience for the user when the Content-Length header is
+	 * found on an HTTP stream.
+	 */
+	private class ProgressInputStream extends InputStream
+	{
+		private InputStream mWrapped;
+		private Handler mAnnounce;
+		
+		private long mRecvdLast;
+		private long mRecvd;
+		private long mTotal;
+		
+		public ProgressInputStream(InputStream in, Handler announce, long total)
+		{
+			mWrapped = in;
+			mAnnounce = announce;
+			mRecvd = 0;
+			mTotal = total;
+		}
+		
+		protected void announceReceipt(long len)
+		{
+			mRecvd += len;
+			assert(mRecvd <= mTotal);
+
+			/* Only update percentage every 1k. */
+			if (mRecvd - mRecvdLast >= 1024)
+			{
+				Message step = mAnnounce.obtainMessage();
+				step.arg1 = (int)(((float)mRecvd / (float)mTotal) * 100.0);
+				mAnnounce.sendMessage(step);
+				
+				mRecvdLast = mRecvd;
+			}
+		}
+		
+		public int read() throws IOException
+		{
+			int b = mWrapped.read();
+			
+			if (b >= 0) 
+				announceReceipt(1);
+			
+			return b;
+		}
+		
+		public int read(byte[] b, int off, int len) throws IOException
+		{
+			int n = mWrapped.read(b, off, len);
+			
+			if (n >= 0)
+				announceReceipt(n);
+			
+			return n;
+		}
+
+		public long skip(long n) throws IOException
+		{
+			long skipped = mWrapped.skip(n);
+			
+			if (skipped >= 0)
+				announceReceipt(skipped);
+			
+			return skipped;
+		}
+		
+		public void close() throws IOException { mWrapped.close(); }		
+		public int read(byte[] b) throws IOException { return read(b, 0, b.length); }
+		public int available() throws IOException { return mWrapped.available(); }
+	}
 
 	public void syncDB(Handler h, String id, String rssurl)
 	{
@@ -90,8 +168,26 @@ public class RSSChannelRefresh extends DefaultHandler
 			xr.setContentHandler(this);
 			xr.setErrorHandler(this);
 
-			URL url = new URL(mRSSURL);
-			xr.parse(new InputSource(url.openStream()));
+			//URL url = new URL(mRSSURL);
+
+			HttpClient client = new HttpClient();
+			client.getHttpConnectionManager().getParams().setConnectionTimeout(30000);
+
+			GetMethod get = new GetMethod(mRSSURL);
+			get.setFollowRedirects(true);
+
+			int result = client.executeMethod(get);
+			Log.d("RSSChannelRefresh", "GET " + mRSSURL + " = " + result);
+
+			long len = get.getResponseContentLength();
+			Log.d("RSSChannelRefresh", "Content-Length: " + len);
+			
+			InputStream stream = get.getResponseBodyAsStream();
+			
+			if (len > 0)
+				stream = new ProgressInputStream(stream, mHandler, len);
+
+			xr.parse(new InputSource(stream));
 		}
 		catch (Exception e)
 		{
