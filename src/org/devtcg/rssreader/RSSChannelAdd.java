@@ -110,8 +110,8 @@ public class RSSChannelAdd extends Activity
 				values.put(RSSReader.Channels.ICON, mIconData.toString());
 
 			ContentURI uri = getContentResolver().insert(getIntent().getData(), values);
-			setResult(RESULT_OK, uri.toString());
 			
+			setResult(RESULT_OK, uri.toString());
 			finish();
 		}
 	};
