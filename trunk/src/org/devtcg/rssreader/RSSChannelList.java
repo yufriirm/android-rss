@@ -74,8 +74,7 @@ public class RSSChannelList extends ListActivity {
     		}
     		else
     		{
-    			String qName = (String)msg.obj;
-        		Log.d("RSSChannelList", "Got a message: " + qName);
+        		Log.d("RSSChannelList", "Got a message: " + msg.arg1);
     		}
     	}
     };
@@ -83,8 +82,6 @@ public class RSSChannelList extends ListActivity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        
-        Log.d("RSSChannelList", "onCreate");
         
         Intent intent = getIntent();
         if (intent.getData() == null)
@@ -109,30 +106,6 @@ public class RSSChannelList extends ListActivity {
         setListAdapter(adapter);
     }
 	
-    @Override
-	protected void onResume()
-	{
-		super.onResume(); 
-		
-		Log.d("RSSChannelList", "onResume");
-	}
-	
-    @Override
-	protected void onFreeze(Bundle icicle)
-	{
-		super.onFreeze(icicle); 
-		
-		Log.d("RSSChannelList", "onFreeze");
-	}
-	
-    @Override
-	protected void onPause()
-	{
-		super.onPause();
-		
-		Log.d("RSSChannelList", "onPause");
-	}
-    
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -172,7 +145,7 @@ public class RSSChannelList extends ListActivity {
     	/* TODO: What does this do?  Found it in the NotesList demo so I just
     	 * decided to copy it for good measure. */
 //    	menu.setGroupShown(Menu.SELECTED_ALTERNATIVE, haveItems);
-    	
+
     	return true;
     }
     
@@ -242,7 +215,7 @@ public class RSSChannelList extends ListActivity {
     	 * continuing to use the program to access existing feed posts. */
     	mRefreshBusy = ProgressDialog.show(this,
     		"Downloading", "Synchronizing new RSS posts...", true, false);
- 
+    	
     	Thread t = new Thread()
     	{
     		public void run()
