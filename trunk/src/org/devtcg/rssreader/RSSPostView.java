@@ -23,12 +23,10 @@ public class RSSPostView extends Activity
 	@Override
 	protected void onCreate(Bundle icicle)
 	{
-		super.onCreate(icicle);
-		
-		Log.d("RSSPostView", "onCreate");
+		super.onCreate(icicle);		
 		setContentView(R.layout.post_view);
 		
-		/* Realize the view with provider data. */
+		/* TODO: Should this be in onStart() or onResume() or something? */
 		initWithData();
 	}
 	
@@ -77,12 +75,4 @@ public class RSSPostView extends Activity
 
 		postText.loadData(html, "text/html", "utf-8");
 	}
-	
-	protected void onStart() { super.onStart(); Log.d("RSSPostView", "onStart"); }
-	protected void onRestart() { super.onRestart(); Log.d("RSSPostView", "onRestart"); }
-	protected void onResume() { super.onResume(); Log.d("RSSPostView", "onResume"); }
-	protected void onFreeze(Bundle icicle) { super.onFreeze(icicle); Log.d("RSSPostView", "onFreeze"); }
-	protected void onPause() { super.onPause(); Log.d("RSSPostView", "onPause"); }
-	protected void onStop() { super.onStop(); Log.d("RSSPostView", "onStop"); }
-	protected void onDestroy() { super.onDestroy(); Log.d("RSSPostView", "onDestroy"); }
 }
