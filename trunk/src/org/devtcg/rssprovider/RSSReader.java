@@ -11,6 +11,8 @@ public final class RSSReader
 {
 	public static final class Channels implements BaseColumns
 	{
+		/* URI for accessing a specific channel.  See Posts.CONTENT_URI_LIST
+		 * for how to "view" the channel posts. */
 		public static final ContentURI CONTENT_URI = 
 			ContentURI.create("content://org.devtcg.rssprovider.RSSReader/channels");
 		
@@ -31,9 +33,11 @@ public final class RSSReader
 	
 	public static final class Posts implements BaseColumns
 	{
+		/* URI for accessing a specific post. */
 		public static final ContentURI CONTENT_URI = 
 			ContentURI.create("content://org.devtcg.rssprovider.RSSReader/posts");
 		
+		/* URI for accessing a list of posts on a particular channel. */
 		public static final ContentURI CONTENT_URI_LIST =
 			ContentURI.create("content://org.devtcg.rssprovider.RSSReader/postlist");
 		
