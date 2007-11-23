@@ -7,6 +7,7 @@ package org.devtcg.rssreader;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -19,6 +20,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -57,28 +59,6 @@ public class RSSChannelList extends ListActivity {
     	RSSReader.Channels._ID, RSSReader.Channels.ICON,
     	RSSReader.Channels.TITLE, RSSReader.Channels.URL };
     
-    /* Special handler that can capture progress messages to report back to this GUI. */
-	protected ProgressDialog mRefreshBusy;	
-	final Handler mRefreshHandler = new Handler()
-    {
-    	public void handleMessage(Message msg)
-    	{
-    		if (msg.arg1 == 0xDEADBEEF)
-    		{
-    			Log.i("RSSChannelList", "Got 0xDEADBEEF");
-    			mRefreshBusy.dismiss();
-    			
-    			/* TODO: We should use the notification system (setNotificationUri)
-    			 * in the provider to help facilitate this. */
-    			mCursor.requery();
-    		}
-    		else
-    		{
-        		Log.d("RSSChannelList", "Got a message: " + msg.arg1);
-    		}
-    	}
-    };
-    
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -92,17 +72,7 @@ public class RSSChannelList extends ListActivity {
         
         mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null);
         
-//        long channelId =
-//          mCursor.getLong(mCursor.getColumnIndex(RSSReader.Channels._ID));
-//
-//        mCursor.setNotificationUri(getContentResolver(),
-//          RSSReader.Posts.CONTENT_URI_LIST.addId(channelId));
-        
-        ListAdapter adapter = new RSSChannelListAdapter(mCursor, this);
-        
-//        ListAdapter adapter = new SimpleCursorAdapter(this,
-//                android.R.layout.simple_list_item_1, mCursor,
-//                new String[] { RSSReader.Channels.TITLE }, new int[] { android.R.id.text1 });
+        ListAdapter adapter = new RSSChannelListAdapter(mCursor, this);        
         setListAdapter(adapter);
     }
 	
@@ -210,11 +180,18 @@ public class RSSChannelList extends ListActivity {
     	
     	final String id = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels._ID));
     	final String rssurl = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels.URL));
+
+    	long channelId =
+    	  mCursor.getInt(mCursor.getColumnIndex(RSSReader.Channels._ID));
+
+    	final RSSChannelListRow row =
+    	  ((RSSChannelListAdapter)getListAdapter()).getViewByRowID(channelId);
     	
-    	/* TODO: Replace with an interface that does not block the user from
-    	 * continuing to use the program to access existing feed posts. */
-    	mRefreshBusy = ProgressDialog.show(this,
-    		"Downloading", "Synchronizing new RSS posts...", true, false);
+		final RSSChannelRefreshHandler handler =
+		  new RSSChannelRefreshHandler(row);		
+
+    	assert(row != null);  
+    	row.startRefresh();
     	
     	Thread t = new Thread()
     	{
@@ -223,11 +200,11 @@ public class RSSChannelList extends ListActivity {
     			Log.e("RSSChannelList", "Here we go: " + rssurl + "...");
     			
     	    	new RSSChannelRefresh(getContentResolver()).
-    	    	  syncDB(mRefreshHandler, id, rssurl);
+    	    	  syncDB(handler, id, rssurl);
     	    	
-    	    	Message done = mRefreshHandler.obtainMessage();
+    	    	Message done = handler.obtainMessage();
     	    	done.arg1 = 0xDEADBEEF;
-    	    	mRefreshHandler.sendMessage(done);
+    	    	handler.sendMessage(done);
     	    	
     	    	Log.i("RSSChannelList", "Sent 0xDEADBEEF");
        		}
@@ -240,105 +217,75 @@ public class RSSChannelList extends ListActivity {
     {
     	private ContentResolver mContent;
     	
-    	private static final int CHANNEL_NAME = 1;
-    	private static final int CHANNEL_COUNT = 2;
-    	private static final int CHANNEL_ICON = 3;
+    	/* TODO: Android should provide a way to look up a View by row, but
+    	 * it does not currently.  Hopefully this will be fixed in future
+    	 * releases. */
+    	private HashMap<Long, RSSChannelListRow> rowMap;
     	
 		public RSSChannelListAdapter(Cursor c, Context context)
 		{
 			super(c, context);
 			mContent = context.getContentResolver();
+			rowMap = new HashMap<Long, RSSChannelListRow>();
 		}
 		
-		private void setViewData(RelativeLayout view, Cursor cursor)
+		protected void updateRowMap(Cursor cursor, RSSChannelListRow row)
 		{
-			long channelId = 
-			  cursor.getLong(cursor.getColumnIndex(RSSReader.Channels._ID));
+			Long channelId =
+			  new Long(cursor.getLong(cursor.getColumnIndex(RSSReader.Channels._ID)));
 			
-			/* Determine number of unread posts. */
-			Cursor unread = 
-			  mContent.query(RSSReader.Posts.CONTENT_URI_LIST.addId(channelId), 
-			    new String[] { RSSReader.Posts._ID }, "read=0", null, null);
-			
-			Typeface tf;
-
-			int unreadCount = unread.count();
-
-			if (unreadCount > 0)
-				tf = Typeface.DEFAULT_BOLD;
-			else
-				tf = Typeface.DEFAULT;
-			
-			ImageView icon = (ImageView)view.findViewById(CHANNEL_ICON);
-			String iconData = cursor.getString(cursor.getColumnIndex(RSSReader.Channels.ICON));
-			
-			if (iconData != null)
-			{
-				byte[] raw = iconData.getBytes();
-				
-				icon.setImageBitmap
-				  (BitmapFactory.decodeByteArray(raw, 0, raw.length));
-			}
-			else
-			{			
-				icon.setImageResource(R.drawable.feedicon);
-			}
-
-			TextView name = (TextView)view.findViewById(CHANNEL_NAME);
-			name.setTypeface(tf);
-			name.setText(cursor, cursor.getColumnIndex(RSSReader.Channels.TITLE));
-
-			TextView count = (TextView)view.findViewById(CHANNEL_COUNT);
-			count.setTypeface(tf);
-			count.setText(new Integer(unreadCount).toString());
+			rowMap.put(channelId, row);
 		}
-
+		
 		@Override
 		public void bindView(View view, Context context, Cursor cursor)
 		{
-			setViewData((RelativeLayout)view, cursor);
+			RSSChannelListRow row = (RSSChannelListRow)view;
+			row.bindView(mContent, cursor);
+			updateRowMap(cursor, row);
 		}
 
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent)
 		{
-			RelativeLayout channel = new RelativeLayout(context);
-			
-			channel.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-			
-			ImageView icon = new ImageView(context);
-			icon.setPadding(0, 2, 3, 2);
-			icon.setId(CHANNEL_ICON);
-			
-			RelativeLayout.LayoutParams iconRules =
-			  new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			
-			iconRules.addRule(RelativeLayout.ALIGN_WITH_PARENT_LEFT);
-			channel.addView(icon, iconRules);
-			
-			TextView count = new TextView(context);
-			count.setId(CHANNEL_COUNT);
-			
-			RelativeLayout.LayoutParams countRules =
-			  new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			
-			countRules.addRule(RelativeLayout.ALIGN_WITH_PARENT_RIGHT);
-			channel.addView(count, countRules);
-			
-			TextView name = new TextView(context);
-			name.setPadding(3, 0, 0, 0);
-			name.setId(CHANNEL_NAME);
-			
-			RelativeLayout.LayoutParams nameRules =
-			  new RelativeLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT);
-			
-			nameRules.addRule(RelativeLayout.POSITION_TO_LEFT, CHANNEL_COUNT);
-			nameRules.addRule(RelativeLayout.POSITION_TO_RIGHT, CHANNEL_ICON);
-			channel.addView(name, nameRules);
-			
-			setViewData(channel, cursor);
-			
-			return channel;
+			RSSChannelListRow row = new RSSChannelListRow(context);
+			row.bindView(mContent, cursor);
+			updateRowMap(cursor, row);
+			return row;
 		}
+		
+		public RSSChannelListRow getViewByRowID(long id)
+		{
+			return rowMap.get(new Long(id));
+		}
+    }
+    
+    private class RSSChannelRefreshHandler extends Handler
+    {
+    	RSSChannelListRow mRow;
+    	
+    	public RSSChannelRefreshHandler(RSSChannelListRow row)
+    	{
+    		super();
+    		mRow = row;
+    	}
+    	
+    	public void handleMessage(Message msg)
+    	{
+    		if (msg.arg1 == 0xDEADBEEF)
+    		{
+    			Log.i("RSSChannelList", "Got 0xDEADBEEF");
+    			mRow.finishRefresh();
+    			
+    			/* TODO: We should use the notification system (setNotificationUri)
+    			 * in the provider to help facilitate this. */
+    			mCursor.requery();
+    		}
+    		else
+    		{
+        		Log.d("RSSChannelList", "Got a message: " + msg.arg1);
+    			mRow.updateRefresh(msg.arg1);
+    		}
+    	}    	 
     }
 }
