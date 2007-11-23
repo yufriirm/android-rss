@@ -11,10 +11,6 @@
                 <category android:value="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:value="android.intent.action.MAIN" />
-                <category android:value="android.intent.category.HOME" />
-            </intent-filter>
-            <intent-filter>
             	<action android:value="android.intent.action.VIEW" />
             	<action android:value="android.intent.action.PICK" />
             	<action android:value="android.intent.action.EDIT" />
