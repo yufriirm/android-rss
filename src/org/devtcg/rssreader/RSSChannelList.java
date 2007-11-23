@@ -4,29 +4,15 @@
 
 package org.devtcg.rssreader;
 
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import org.devtcg.rssprovider.RSSReader;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import android.app.ListActivity;
-import android.app.ProgressDialog;
-import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
-import android.graphics.Typeface;
 import android.net.ContentURI;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,21 +23,16 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
-import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
-import android.widget.RelativeLayout.LayoutParams;
 
 public class RSSChannelList extends ListActivity {
 	
 	public static final int DELETE_ID = Menu.FIRST;
 	public static final int INSERT_ID = Menu.FIRST + 1;
 	public static final int REFRESH_ID = Menu.FIRST + 2;
+	public static final int REFRESH_ALL_ID = Menu.FIRST + 3;
 	
 	private Cursor mCursor;
 	
@@ -103,9 +84,11 @@ public class RSSChannelList extends ListActivity {
     		 * TODO: Use this for Intent.EDIT_ACTION */
 //    		ContentURI uri = getIntent().getData().addId(getSelectionRowID());
 
+    		menu.add(Menu.SELECTED_ALTERNATIVE, REFRESH_ALL_ID, "Refresh All");
+  		
     		menu.add(Menu.SELECTED_ALTERNATIVE, REFRESH_ID, "Refresh Channel").
-    		  setShortcut(0, 0, KeyEvent.KEYCODE_R);
-    		
+		  	  setShortcut(0, 0, KeyEvent.KEYCODE_R);
+    		  
     		menu.add(Menu.SELECTED_ALTERNATIVE, DELETE_ID, "Delete Channel").
     		  setShortcut(KeyEvent.KEYCODE_2, 0, KeyEvent.KEYCODE_D);
     		
@@ -151,7 +134,12 @@ public class RSSChannelList extends ListActivity {
     		return true;
     		
     	case REFRESH_ID:
+        	mCursor.moveTo(getSelection());    	        	
     		refreshChannel();
+    		return true;
+    		
+    	case REFRESH_ALL_ID:
+    		refreshAllChannels();
     		return true;
     	}
     	
@@ -174,10 +162,20 @@ public class RSSChannelList extends ListActivity {
 		mCursor.deleteRow();
     }
     
+    private final void refreshAllChannels()
+    {
+    	if (mCursor.first() == false)
+    		return;
+
+    	do {
+    		refreshChannel();
+    	} while (mCursor.next() == true);
+    }
+
+    /* This method assumes that `mCursor` has been positioned on the record
+     * we want to refresh. */
     private final void refreshChannel()
     {
-    	mCursor.moveTo(getSelection());    	
-    	
     	final String id = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels._ID));
     	final String rssurl = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels.URL));
 
@@ -195,7 +193,10 @@ public class RSSChannelList extends ListActivity {
     	
     	Thread t = new Thread()
     	{
-    		public void run()
+    		/* Only let one of these network download threads run at a time.
+    		 * I should really think of a better way to deal with this case,
+    		 * but I'm too lazy for now... */  
+    		public synchronized void run()
     		{
     			Log.e("RSSChannelList", "Here we go: " + rssurl + "...");
     			
