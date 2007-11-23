@@ -10,7 +10,6 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.WebView;
 import android.widget.TextView;
 

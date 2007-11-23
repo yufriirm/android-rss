@@ -7,7 +7,6 @@ package org.devtcg.rssreader;
 import org.devtcg.rssprovider.RSSReader;
 
 import android.app.ListActivity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -20,7 +19,6 @@ import android.widget.CursorAdapter;
 import android.widget.Filterable;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 public class RSSPostList extends ListActivity
