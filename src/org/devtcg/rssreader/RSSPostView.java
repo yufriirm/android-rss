@@ -51,14 +51,14 @@ public class RSSPostView extends Activity
 		    longValue();
 		
 		Cursor cChannel = cr.query(RSSReader.Channels.CONTENT_URI.addId(channelId),
-		  new String[] { RSSReader.Channels.TITLE }, null, null, null);
+		  new String[] { RSSReader.Channels.ICON, RSSReader.Channels.LOGO, RSSReader.Channels.TITLE }, null, null, null);
 				
 		assert(cChannel.count() == 1);
 		cChannel.first();
 		
 		/* Make the view useful. */
-		TextView channelTitle = (TextView)findViewById(R.id.channelTitle);
-		channelTitle.setText(cChannel, cChannel.getColumnIndex(RSSReader.Channels.TITLE));
+		RSSChannelHead head = (RSSChannelHead)findViewById(R.id.postViewHead);
+		head.setLogo(cChannel);
 		
 		TextView postTitle = (TextView)findViewById(R.id.postTitle);
 		postTitle.setText(cPost, cPost.getColumnIndex(RSSReader.Posts.TITLE));
