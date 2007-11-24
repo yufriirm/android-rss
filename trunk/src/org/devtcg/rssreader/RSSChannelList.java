@@ -67,8 +67,8 @@ public class RSSChannelList extends ListActivity
 
         mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null);
 
-        bindService(new Intent(this, RSSReaderService.class),
-          null, mServiceConn, Context.BIND_AUTO_CREATE);
+//        bindService(new Intent(this, RSSReaderService.class),
+//          null, mServiceConn, Context.BIND_AUTO_CREATE);
         
         SharedPreferences settings = getSharedPreferences(TAG_PREFS, 0);
         mFirstTime = settings.getBoolean("firstTime", true);
@@ -79,8 +79,8 @@ public class RSSChannelList extends ListActivity
          * next device reboot.  After `firstTime`, RSSReaderService_Setup
          * will handle our setup at BOOT_COMPLETED. 
          */
-        if (mFirstTime == true)
-        	RSSReaderService_Setup.setupAlarm(this);
+//        if (mFirstTime == true)
+//        	RSSReaderService_Setup.setupAlarm(this);
 
         ListAdapter adapter = new RSSChannelListAdapter(mCursor, this);     
         setListAdapter(adapter);
@@ -246,7 +246,7 @@ public class RSSChannelList extends ListActivity
     	  ((RSSChannelListAdapter)getListAdapter()).getViewByRowID(channelId);
     	
 		final RSSChannelRefreshHandler handler =
-		  new RSSChannelRefreshHandler(row);		
+		  new RSSChannelRefreshHandler(row);
 
     	assert(row != null);  
     	row.startRefresh();
