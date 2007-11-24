@@ -2,7 +2,7 @@
  * $Id$
  */
 
-packagels org.devtcg.rssreader;
+package org.devtcg.rssreader;
 
 interface IRSSReaderService
 {
