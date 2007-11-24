@@ -14,7 +14,7 @@
 	<EditText id="@+id/url"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:text="http://www.smartphonethoughts.com/xml"
+		android:text="http://"
 		android:singleLine="true"
 		/>
 		

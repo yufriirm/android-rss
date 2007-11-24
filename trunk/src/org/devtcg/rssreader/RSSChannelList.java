@@ -8,15 +8,21 @@ import java.util.HashMap;
 
 import org.devtcg.rssprovider.RSSReader;
 
+import android.app.AlarmManager;
 import android.app.ListActivity;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ContentURI;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -27,7 +33,10 @@ import android.widget.Filterable;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-public class RSSChannelList extends ListActivity {
+public class RSSChannelList extends ListActivity
+{
+	public static final String TAG = "RSSChannelList";
+	public static final String TAG_PREFS = "RSSReader";
 	
 	public static final int DELETE_ID = Menu.FIRST;
 	public static final int INSERT_ID = Menu.FIRST + 1;
@@ -36,27 +45,76 @@ public class RSSChannelList extends ListActivity {
 	
 	private Cursor mCursor;
 	
+	private boolean mFirstTime;
+	
+	private IRSSReaderService mService;
+	
     private static final String[] PROJECTION = new String[] {
-    	RSSReader.Channels._ID, RSSReader.Channels.ICON,
-    	RSSReader.Channels.TITLE, RSSReader.Channels.URL };
+      RSSReader.Channels._ID, RSSReader.Channels.ICON,
+      RSSReader.Channels.TITLE, RSSReader.Channels.URL };
     
     @Override
-    public void onCreate(Bundle icicle) {
+    protected void onCreate(Bundle icicle)
+    {
         super.onCreate(icicle);
-        
+
         Intent intent = getIntent();
         if (intent.getData() == null)
             intent.setData(RSSReader.Channels.CONTENT_URI);
-        
+
         if (intent.getAction() == null)
         	intent.setAction(Intent.VIEW_ACTION);
-        
+
         mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null);
+
+        bindService(new Intent(this, RSSReaderService.class),
+          null, mServiceConn, Context.BIND_AUTO_CREATE);
         
-        ListAdapter adapter = new RSSChannelListAdapter(mCursor, this);        
+        SharedPreferences settings = getSharedPreferences(TAG_PREFS, 0);
+        mFirstTime = settings.getBoolean("firstTime", true);
+        
+        /*
+         * If this is the first time the user has opened our app ever, 
+         * install the RSSReaderService_Alarm as has been scheduled for
+         * next device reboot.  After `firstTime`, RSSReaderService_Setup
+         * will handle our setup at BOOT_COMPLETED. 
+         */
+        if (mFirstTime == true)
+        	RSSReaderService_Setup.setupAlarm(this);
+
+        ListAdapter adapter = new RSSChannelListAdapter(mCursor, this);     
         setListAdapter(adapter);
     }
-	
+    
+    @Override
+    protected void onStop()
+    {
+    	super.onStop();
+    	
+    	if (mFirstTime == true)
+    	{
+    		SharedPreferences settings = getSharedPreferences(TAG_PREFS, 0);
+    		SharedPreferences.Editor editor = settings.edit();
+    		editor.putBoolean("firstTime", false);
+    		editor.commit();
+    	}
+    }
+    
+    private ServiceConnection mServiceConn = new ServiceConnection()
+    {
+    	public void onServiceConnected(ComponentName className, IBinder service)
+    	{
+    		Log.d(TAG, "onServiceConnected");
+    		mService = IRSSReaderService.Stub.asInterface((IBinder)service);
+    	}
+
+    	public void onServiceDisconnected(ComponentName className)
+    	{
+    		Log.d(TAG, "onServiceDisconnected");
+    		mService = null;
+    	}
+    };
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -83,6 +141,8 @@ public class RSSChannelList extends ListActivity {
     		/* Get initially selected item... 
     		 * TODO: Use this for Intent.EDIT_ACTION */
 //    		ContentURI uri = getIntent().getData().addId(getSelectionRowID());
+
+    		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
 
     		menu.add(Menu.SELECTED_ALTERNATIVE, REFRESH_ALL_ID, "Refresh All");
   		
@@ -140,7 +200,7 @@ public class RSSChannelList extends ListActivity {
     		
     	case REFRESH_ALL_ID:
     		refreshAllChannels();
-    		return true;
+    		return true;    		
     	}
     	
     	return super.onOptionsItemSelected(item);
