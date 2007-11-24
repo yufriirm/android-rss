@@ -42,21 +42,18 @@
         		<type android:value="vnd.android.cursor.item/vnd.rssreader.post" />
         	</intent-filter>
         </activity>
-        
-        <!-- Setup the repeating alarm when the device turns on. -->
+
+<!--        
         <receiver class="RSSReaderService_Setup" android:process=":remote">
         	<intent-filter>
         		<action android:value="android.intent.action.BOOT_COMPLETED" />
         	</intent-filter>
         </receiver>
         
-        <!-- Fires at each interval setup in RSSReaderService_Setup; just passes
-             work to RSSReaderService. -->
         <receiver class="RSSReaderService_Alarm" android:process=":remote" />
         
-        <!-- Does all the real work of refreshing the feeds and communicating with
-             RSSChannelList where appropriate. -->
         <service class="RSSReaderService" android:process=":remote" />
+  -->
         
     </application>
 </manifest> 
