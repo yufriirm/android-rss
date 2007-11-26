@@ -68,7 +68,7 @@ public class RSSPostView extends Activity
 		/* TODO: I want the background transparent, but that doesn't seem 
 		 * possible.  Black will do for now. */
 		String html =
-			"<html><head><style type=\"text/css\">body { background-color: black; color: white; } a { color: #ddf; }</style></head><body>" +
+			"<html><head><style type=\"text/css\">body { background-color: #201c19; color: white; } a { color: #ddf; }</style></head><body>" +
 			cPost.getString(cPost.getColumnIndex(RSSReader.Posts.BODY)) +
 			"</body></html>";
 
