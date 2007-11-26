@@ -82,8 +82,10 @@ public class RSSChannelListRow extends RelativeLayout
 		addView(mName, nameRules);    		
 	}
 
-	public void bindView(ContentResolver content, Cursor cursor)
+	public void bindView(Cursor cursor)
 	{
+		ContentResolver content = getContext().getContentResolver();
+		
 		long channelId = 
 		  cursor.getLong(cursor.getColumnIndex(RSSReader.Channels._ID));
 

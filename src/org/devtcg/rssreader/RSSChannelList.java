@@ -217,7 +217,7 @@ public class RSSChannelList extends ListActivity
 
 		/* Delete related posts. */
 		getContentResolver().delete(RSSReader.Posts.CONTENT_URI,
-    			"channel_id=?", new String[] { channelId });
+    	  "channel_id=?", new String[] { channelId });
 
 		mCursor.deleteRow();
     }
@@ -276,8 +276,6 @@ public class RSSChannelList extends ListActivity
     
     private static class RSSChannelListAdapter extends CursorAdapter implements Filterable
     {
-    	private ContentResolver mContent;
-    	
     	/* TODO: Android should provide a way to look up a View by row, but
     	 * it does not currently.  Hopefully this will be fixed in future
     	 * releases. */
@@ -286,7 +284,6 @@ public class RSSChannelList extends ListActivity
 		public RSSChannelListAdapter(Cursor c, Context context)
 		{
 			super(c, context);
-			mContent = context.getContentResolver();
 			rowMap = new HashMap<Long, RSSChannelListRow>();
 		}
 		
@@ -302,7 +299,7 @@ public class RSSChannelList extends ListActivity
 		public void bindView(View view, Context context, Cursor cursor)
 		{
 			RSSChannelListRow row = (RSSChannelListRow)view;
-			row.bindView(mContent, cursor);
+			row.bindView(cursor);
 			updateRowMap(cursor, row);
 		}
 
@@ -310,7 +307,7 @@ public class RSSChannelList extends ListActivity
 		public View newView(Context context, Cursor cursor, ViewGroup parent)
 		{
 			RSSChannelListRow row = new RSSChannelListRow(context);
-			row.bindView(mContent, cursor);
+			row.bindView(cursor);
 			updateRowMap(cursor, row);
 			return row;
 		}
