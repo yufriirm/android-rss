@@ -4,8 +4,6 @@
 
 package org.devtcg.rssreader;
 
-import java.util.Map;
-
 import org.devtcg.rssprovider.RSSReader;
 
 import android.app.ListActivity;
@@ -13,19 +11,15 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Typeface;
 import android.net.ContentURI;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.CursorAdapter;
 import android.widget.Filterable;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class RSSPostList extends ListActivity
 {
@@ -42,6 +36,15 @@ public class RSSPostList extends ListActivity
 		
 		setContentView(R.layout.post_list);
 		
+		ListView list = (ListView)findViewById(android.R.id.list);
+
+//		ViewGroup.MarginLayoutParams listNoMargins =
+//		  new ViewGroup.MarginLayoutParams
+//		    (LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+//		
+//		listNoMargins.setMargins(0, 1, 0, 1);
+//		list.setLayoutParams(listNoMargins);
+		
 		mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null);
 
 		ListAdapter adapter = new RSSPostListAdapter(mCursor, this);
@@ -51,7 +54,7 @@ public class RSSPostList extends ListActivity
 //                new String[] { RSSReader.Posts.TITLE }, new int[] { android.R.id.text1 });
         setListAdapter(adapter);
 	}
-	
+
 	@Override
 	protected void onStart()
 	{
@@ -98,27 +101,17 @@ public class RSSPostList extends ListActivity
 			super(c, context);
 		}
 		
-		private void setViewData(TextView view, Cursor cursor)
-		{
-			if (cursor.getInt(cursor.getColumnIndex(RSSReader.Posts.READ)) != 0)
-				view.setTypeface(Typeface.DEFAULT);
-			else
-				view.setTypeface(Typeface.DEFAULT_BOLD);
-				
-			view.setText(cursor, cursor.getColumnIndex(RSSReader.Posts.TITLE));
-		}
-
 		@Override
 		public void bindView(View view, Context context, Cursor cursor)
 		{
-			setViewData((TextView)view, cursor);
+			((RSSPostListRow)view).bindView(cursor);
 		}
 
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent)
 		{
-			TextView post = new TextView(context);
-			setViewData(post, cursor);
+			RSSPostListRow post = new RSSPostListRow(context);
+			post.bindView(cursor);
 			return post;
 		}
     }
