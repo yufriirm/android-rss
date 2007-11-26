@@ -65,6 +65,7 @@ public class RSSChannelRefresh extends DefaultHandler
 		mStateMap.put("content", new Integer(STATE_IN_ITEM_DESC));
 		mStateMap.put("dc:date", new Integer(STATE_IN_ITEM_DATE));
 		mStateMap.put("updated", new Integer(STATE_IN_ITEM_DATE));
+		mStateMap.put("pubDate", new Integer(STATE_IN_ITEM_DATE));
 		mStateMap.put("dc:author", new Integer(STATE_IN_ITEM_AUTHOR));
 		mStateMap.put("author", new Integer(STATE_IN_ITEM_AUTHOR));
 	}
