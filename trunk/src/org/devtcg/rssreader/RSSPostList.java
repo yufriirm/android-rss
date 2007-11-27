@@ -26,7 +26,8 @@ public class RSSPostList extends ListActivity
 {
 	private static final String[] PROJECTION = new String[] {
 	  RSSReader.Posts._ID, RSSReader.Posts.CHANNEL_ID,
-	  RSSReader.Posts.TITLE, RSSReader.Posts.READ };
+	  RSSReader.Posts.TITLE, RSSReader.Posts.READ,
+	  RSSReader.Posts.DATE };
 	
 	private Cursor mCursor;
 
@@ -37,8 +38,8 @@ public class RSSPostList extends ListActivity
 		
 		setContentView(R.layout.post_list);
 		
-		ListView list = (ListView)findViewById(android.R.id.list);
-
+//		ListView list = (ListView)findViewById(android.R.id.list);
+//		
 //		ViewGroup.MarginLayoutParams listNoMargins =
 //		  new ViewGroup.MarginLayoutParams
 //		    (LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
