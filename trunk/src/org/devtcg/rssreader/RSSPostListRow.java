@@ -97,10 +97,10 @@ public class RSSPostListRow extends ViewGroup
 		mDate.measure
 		 (getChildMeasureSpec(widthSpec, 0, mDate.getLayoutParams().width),
 		  getChildMeasureSpec(heightSpec, 0, mDate.getLayoutParams().height));
-		
+
 		int h;
 		int lines = mSubject.getLineCount();
-		
+
 		if (lines <= 1)
 			h = mSubject.getMeasuredHeight() + mDate.getMeasuredHeight();
 		else
