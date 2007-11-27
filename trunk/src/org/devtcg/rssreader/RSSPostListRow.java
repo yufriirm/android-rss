@@ -4,6 +4,10 @@
 
 package org.devtcg.rssreader;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.devtcg.rssprovider.RSSReader;
 
 import android.content.Context;
@@ -27,6 +31,19 @@ public class RSSPostListRow extends RelativeLayout
 	
 	private Rect mRect;
 	private Paint mGray;
+	
+	private static final SimpleDateFormat mDateFmtDB;
+	private static final SimpleDateFormat mDateFmtToday;
+	private static final SimpleDateFormat mDateFmt;
+	
+	static
+	{
+		mDateFmtDB = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+		mDateFmtToday = new SimpleDateFormat("h:mma");
+		
+		/* TODO: Format date according to the current locale. */
+		mDateFmt = new SimpleDateFormat("MM/dd/yyyy h:mma");
+	}
 
 	public RSSPostListRow(Context context)
 	{
@@ -66,41 +83,49 @@ public class RSSPostListRow extends RelativeLayout
 	@Override
 	protected void onLayout(boolean changed, int wl, int wt, int l, int t, int r, int b)
 	{
-		Log.d("RSSPostListView", "onLayout(" + changed + ", " + wl + ", " + wt + ", " + l + ", " + t + ", " + r + ", " + b + ")");
+		int subjw = mSubject.getMeasuredWidth();
+		int subjh = mSubject.getMeasuredHeight();
+		int lineh = mSubject.getLineHeight();
+		int datew = mDate.getMeasuredWidth();
+		int dateh = mDate.getMeasuredHeight();
+		int selfw = getMeasuredWidth();
+		int selfh = getMeasuredHeight();
 		
-		//super.onLayout(changed, wl, wt, l, t, r, b);
-		
-		//mSubject.layout(wl, wt, l, t, r, b);
-		
-		assert(getChildCount() == 1);
-		assert(getChildAt(0) == mSubject);
-		
-		mSubject.layout(mWindowLeft, mWindowTop, 0, 0, mSubject.getMeasuredWidth(), mSubject.getMeasuredHeight());
-		mDate.layout(mWindowLeft, mWindowTop + mSubject.getLineHeight(), getMeasuredWidth() - mDate.getMeasuredWidth(), mSubject.getLineHeight(), getMeasuredWidth(), mDate.getMeasuredHeight() + mSubject.getLineHeight());
-		
-		//Log.d("RSSPostListView", "   width=" + mSubject.getMeasuredWidth());
-		//Log.d("RSSPostListView", "   height=" + mSubject.getMeasuredHeight());
-		
-		//mDate.layout(wl + r - mDate.getMeasuredWidth(), wt + b - mDate.getMeasuredHeight(),
-		//mDate.layout(wl + 10, wt + 10, l + 10, t + 10, r + 10, b + 10);
+		mSubject.layout(mWindowLeft, mWindowTop, 0, 0, subjw, subjh);
+		mDate.layout(mWindowLeft, mWindowTop + selfh - (dateh + 4),
+		  selfw - datew, selfh - (dateh + 4), selfw, selfh - 4);
 	}
 
 	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
+	protected void onMeasure(int widthSpec, int heightSpec)
 	{
-		Log.d("RSSPostListView", "onMeasure(" + widthMeasureSpec + ", " + heightMeasureSpec + ")");
-		Log.d("RSSPostListView", "   width=" + View.MeasureSpec.toString(widthMeasureSpec));
-		Log.d("RSSPostListView", "   height=" + View.MeasureSpec.toString(heightMeasureSpec));
+		int w = View.MeasureSpec.getSize(widthSpec);
 		
-		//super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		mSubject.measure(widthSpec, heightSpec);
+		mDate.measure
+		 (getChildMeasureSpec(widthSpec, 0, mDate.getLayoutParams().width),
+		  getChildMeasureSpec(heightSpec, 0, mDate.getLayoutParams().height));
 		
-		/* TODO! */
-		mSubject.measure(widthMeasureSpec, heightMeasureSpec);
-		mDate.measure(getChildMeasureSpec(widthMeasureSpec, 0, mDate.getLayoutParams().width), getChildMeasureSpec(heightMeasureSpec, 0, mDate.getLayoutParams().height));
-		setMeasuredDimension(View.MeasureSpec.getSize(widthMeasureSpec), 39);
+		int h;
+		int lines = mSubject.getLineCount();
 		
-		Log.d("RSSPostListView", "   newW=" + getMeasuredWidth());
-		Log.d("RSSPostListView", "   newH=" + getMeasuredHeight());
+		if (lines <= 1)
+			h = mSubject.getMeasuredHeight() + mDate.getMeasuredHeight();
+		else
+		{			
+			h = mSubject.getMeasuredHeight();
+			
+			/* Attempt to figure out if the last line "bleeds" into the date.
+			 * If it does, we need to arbitrarily force our layout one line
+			 * longer. */
+			float linew = mSubject.getLayout().getLineRight(lines - 1);
+			
+			if ((linew + 10) > (w - mDate.getMeasuredWidth()))
+				h += mDate.getMeasuredHeight();
+		}
+		
+		/* Add a bottom 4px padding. */
+		setMeasuredDimension(w, h + 4);
 	}
 	
 	@Override
@@ -124,6 +149,34 @@ public class RSSPostListRow extends RelativeLayout
 		mSubject.setText(cursor, cursor.getColumnIndex(RSSReader.Posts.TITLE));
 
 		/* TODO */
-		mDate.setText("11/25/2007 11:34AM");
+		String datestr = cursor.getString(cursor.getColumnIndex(RSSReader.Posts.DATE));
+
+		try
+		{
+			Date date = mDateFmtDB.parse(datestr);
+			
+			SimpleDateFormat fmt;
+			Date now = new Date();
+
+			/* TODO: Yeah, yeah, deprecated, I get it... */
+			if (now.getDate() == date.getDate() &&
+			    now.getMonth() == date.getMonth() &&
+			    now.getYear() == date.getYear())
+			{
+				fmt = mDateFmtToday;
+			}
+			else
+			{
+				fmt = mDateFmt;
+			}
+			
+			mDate.setText(fmt.format(date));
+		}
+		catch (ParseException e)
+		{
+			/* What the hell?  We screwed our database? */
+			Log.d("RSSPostListRow", Log.getStackTraceString(e));
+			mDate.setText("");
+		}
 	}
 }
