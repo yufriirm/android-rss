@@ -39,7 +39,7 @@ public class RSSChannelHead extends LinearLayout
 	private Paint mBlack2;
 	
 	/* Default padding for each widget. */
-	private static final int paddingTop = 4;
+	private static final int paddingTop = 2;
 	private static final int paddingBottom = 6;
 	
 	public RSSChannelHead(Context context, AttributeSet attrs, Map inflateParams)
@@ -84,7 +84,7 @@ public class RSSChannelHead extends LinearLayout
 		if (mIcon == null)
 		{
 			mIcon = new ImageView(getContext());
-			mIcon.setPadding(8, paddingTop, 0, paddingBottom);
+			mIcon.setPadding(10, paddingTop, 0, paddingBottom);
 			
 			LayoutParams iconRules =
 			  new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -109,7 +109,7 @@ public class RSSChannelHead extends LinearLayout
 		if (mLogoText == null)
 		{
 			mLogoText = new TextView(getContext());
-			mLogoText.setPadding(3, paddingTop, 0, paddingBottom);
+			mLogoText.setPadding(6, paddingTop, 0, paddingBottom);
 			mLogoText.setTypeface(Typeface.DEFAULT_BOLD);
 			addView(mLogoText, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));			
 		}
