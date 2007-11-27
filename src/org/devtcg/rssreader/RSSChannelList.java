@@ -241,7 +241,9 @@ public class RSSChannelList extends ListActivity
 
     	long channelId =
     	  mCursor.getInt(mCursor.getColumnIndex(RSSReader.Channels._ID));
-
+    	
+    	/* TODO: Is there a generalization of getListView().getSelectedView() we can use here?
+    	 * http://groups.google.com/group/android-developers/browse_thread/thread/4070126fd996001c */
     	final RSSChannelListRow row =
     	  ((RSSChannelListAdapter)getListAdapter()).getViewByRowID(channelId);
     	
