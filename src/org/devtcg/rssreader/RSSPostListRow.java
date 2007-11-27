@@ -18,10 +18,10 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.view.View;
-import android.widget.RelativeLayout;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class RSSPostListRow extends RelativeLayout
+public class RSSPostListRow extends ViewGroup
 {
 	private static final int SUBJECT_ID = 1;
 	private static final int DATE_ID = 2;
@@ -53,17 +53,12 @@ public class RSSPostListRow extends RelativeLayout
 		mGray = new Paint();
 		mGray.setStyle(Paint.Style.STROKE);
 		mGray.setColor(0xff9c9e9c);
-		
-		setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 
 		mSubject = new TextView(context);
 		mSubject.setId(SUBJECT_ID);
-		
+
 		LayoutParams subjectRules =
 		  new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		
-		subjectRules.addRule(ALIGN_WITH_PARENT_LEFT);
-		subjectRules.addRule(ALIGN_WITH_PARENT_TOP);
 		
 		addView(mSubject, subjectRules);
 
@@ -74,9 +69,6 @@ public class RSSPostListRow extends RelativeLayout
 		LayoutParams dateRules =
 		  new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
-		dateRules.addRule(ALIGN_WITH_PARENT_RIGHT);
-		//dateRules.addRule(POSITION_TO_RIGHT, SUBJECT_ID);
-
 		addView(mDate, dateRules);
 	}
 
@@ -85,7 +77,6 @@ public class RSSPostListRow extends RelativeLayout
 	{
 		int subjw = mSubject.getMeasuredWidth();
 		int subjh = mSubject.getMeasuredHeight();
-		int lineh = mSubject.getLineHeight();
 		int datew = mDate.getMeasuredWidth();
 		int dateh = mDate.getMeasuredHeight();
 		int selfw = getMeasuredWidth();
@@ -123,7 +114,7 @@ public class RSSPostListRow extends RelativeLayout
 			if ((linew + 10) > (w - mDate.getMeasuredWidth()))
 				h += mDate.getMeasuredHeight();
 		}
-		
+
 		/* Add a bottom 4px padding. */
 		setMeasuredDimension(w, h + 4);
 	}
