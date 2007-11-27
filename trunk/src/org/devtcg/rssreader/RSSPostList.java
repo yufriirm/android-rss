@@ -11,6 +11,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.ContentURI;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,22 +39,9 @@ public class RSSPostList extends ListActivity
 		
 		setContentView(R.layout.post_list);
 		
-//		ListView list = (ListView)findViewById(android.R.id.list);
-//		
-//		ViewGroup.MarginLayoutParams listNoMargins =
-//		  new ViewGroup.MarginLayoutParams
-//		    (LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-//		
-//		listNoMargins.setMargins(0, 1, 0, 1);
-//		list.setLayoutParams(listNoMargins);
-		
 		mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null);
 		
 		ListAdapter adapter = new RSSPostListAdapter(mCursor, this);
-
-//        ListAdapter adapter = new SimpleCursorAdapter(this,
-//                android.R.layout.simple_list_item_1, mCursor,
-//                new String[] { RSSReader.Posts.TITLE }, new int[] { android.R.id.text1 });
         setListAdapter(adapter);
 	}
 
