@@ -5,7 +5,7 @@
  * parsers for Atom 1.0, Atom 0.3, RSS 0.91, RSS 1.0 and RSS 2.0.  Hell,
  * this whole thing needs to be chucked and redone.
  * 
- * Parser code lifted from Informa <http://informa.sourceforge.net>.
+ * Date parser code lifted from Informa <http://informa.sourceforge.net>.
  */
 
 package org.devtcg.rssreader;
