@@ -2,14 +2,21 @@
  * $Id$
  * 
  * TODO: This class needs to be generalized much better, with specialized
- * parsers for Atom 1.0, Atom 0.3, RSS 0.91, RSS 1.0 and RSS 2.0.
+ * parsers for Atom 1.0, Atom 0.3, RSS 0.91, RSS 1.0 and RSS 2.0.  Hell,
+ * this whole thing needs to be chucked and redone.
+ * 
+ * Parser code lifted from Informa <http://informa.sourceforge.net>.
  */
 
 package org.devtcg.rssreader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -54,6 +61,9 @@ public class RSSChannelRefresh extends DefaultHandler
 	
 	private static HashMap<String, Integer> mStateMap;
 	
+	private static final SimpleDateFormat[] dateFormats;
+	private static final int dateFormat_default;
+	
 	static
 	{
 		mStateMap = new HashMap<String, Integer>();		
@@ -68,6 +78,33 @@ public class RSSChannelRefresh extends DefaultHandler
 		mStateMap.put("pubDate", new Integer(STATE_IN_ITEM_DATE));
 		mStateMap.put("dc:author", new Integer(STATE_IN_ITEM_AUTHOR));
 		mStateMap.put("author", new Integer(STATE_IN_ITEM_AUTHOR));
+		
+		dateFormat_default = 6;
+	    final String[] possibleDateFormats =
+	    {
+	    	"EEE, dd MMM yyyy HH:mm:ss z", // RFC_822
+	    	"EEE, dd MMM yyyy HH:mm zzzz",
+	    	"yyyy-MM-dd'T'HH:mm:ssZ",
+	    	"yyyy-MM-dd'T'HH:mm:ss.SSSzzzz", // Blogger Atom feed has millisecs also
+	    	"yyyy-MM-dd'T'HH:mm:sszzzz",
+	    	"yyyy-MM-dd'T'HH:mm:ss z",
+	    	"yyyy-MM-dd'T'HH:mm:ssz", // ISO_8601
+	    	"yyyy-MM-dd'T'HH:mm:ss",
+	    	"yyyy-MM-dd'T'HHmmss.SSSz",
+	    	"yyyy-MM-dd"
+	    };
+
+	    dateFormats = new SimpleDateFormat[possibleDateFormats.length];
+	    TimeZone gmtTZ = TimeZone.getTimeZone("GMT");
+	    
+	    for (int i = 0; i < possibleDateFormats.length; i++)
+	    {
+	    	/* TODO: Support other locales? */
+	    	dateFormats[i] = new SimpleDateFormat(possibleDateFormats[i],
+	    	  Locale.ENGLISH);
+	    	
+	    	dateFormats[i].setTimeZone(gmtTZ);
+	    }
 	}
 
 	public RSSChannelRefresh(ContentResolver resolver)
@@ -244,14 +281,14 @@ public class RSSChannelRefresh extends DefaultHandler
 				if (dup.count() == 0)
 				{
 					ContentValues values = new ContentValues();
-				
+
 					values.put(RSSReader.Posts.CHANNEL_ID, mID);
 					values.put(RSSReader.Posts.TITLE, mPostBuf.title);
 					values.put(RSSReader.Posts.URL, mPostBuf.link);
 					values.put(RSSReader.Posts.AUTHOR, mPostBuf.author);
-					values.put(RSSReader.Posts.DATE, mPostBuf.date);
+					values.put(RSSReader.Posts.DATE, mPostBuf.getDate());
 					values.put(RSSReader.Posts.BODY, mPostBuf.desc);
-				
+					
 					mContent.insert(RSSReader.Posts.CONTENT_URI, values);
 				}
 			}
@@ -280,7 +317,7 @@ public class RSSChannelRefresh extends DefaultHandler
 			mPostBuf.link = new String(ch, start, length);
 			break;
 		case STATE_IN_ITEM | STATE_IN_ITEM_DATE:
-			mPostBuf.date = new String(ch, start, length);
+			mPostBuf.setDate(new String(ch, start, length));
 			break;
 		case STATE_IN_ITEM | STATE_IN_ITEM_AUTHOR:
 			mPostBuf.author = new String(ch, start, length);
@@ -290,10 +327,65 @@ public class RSSChannelRefresh extends DefaultHandler
 		}
 	}
 	
+	/* Copied verbatim from Informa 0.7.0-alpha2 ParserUtils.java. */
+	private static Date parseDate(String strdate) {
+		Date result = null;
+		strdate = strdate.trim();
+		if (strdate.length() > 10) {
+
+			// TODO deal with +4:00 (no zero before hour)
+			if ((strdate.substring(strdate.length() - 5).indexOf("+") == 0 || strdate
+					.substring(strdate.length() - 5).indexOf("-") == 0)
+					&& strdate.substring(strdate.length() - 5).indexOf(":") == 2) {
+
+				String sign = strdate.substring(strdate.length() - 5,
+						strdate.length() - 4);
+
+				strdate = strdate.substring(0, strdate.length() - 5) + sign + "0"
+				+ strdate.substring(strdate.length() - 4);
+				// logger.debug("CASE1 : new date " + strdate + " ? "
+				//    + strdate.substring(0, strdate.length() - 5));
+
+			}
+
+			String dateEnd = strdate.substring(strdate.length() - 6);
+
+			// try to deal with -05:00 or +02:00 at end of date
+			// replace with -0500 or +0200
+			if ((dateEnd.indexOf("-") == 0 || dateEnd.indexOf("+") == 0)
+					&& dateEnd.indexOf(":") == 3) {
+				// TODO deal with GMT-00:03
+				if ("GMT".equals(strdate.substring(strdate.length() - 9, strdate
+						.length() - 6))) {
+					Log.d(TAG, "General time zone with offset, no change");
+				} else {
+					// continue treatment
+					String oldDate = strdate;
+					String newEnd = dateEnd.substring(0, 3) + dateEnd.substring(4);
+					strdate = oldDate.substring(0, oldDate.length() - 6) + newEnd;
+					// logger.debug("!!modifying string ->"+strdate);
+				}
+			}
+		}
+		int i = 0;
+		while (i < dateFormats.length) {
+			try {
+				result = dateFormats[i].parse(strdate);
+				// logger.debug("******Parsing Success "+strdate+"->"+result+" with
+				// "+dateFormats[i].toPattern());
+				break;
+			} catch (java.text.ParseException eA) {
+				i++;
+			}
+		}
+
+		return result;
+	}
+	
 	private class RSSChannelPost
 	{
 		public String title;
-		public String date;
+		public Date date;
 		public String desc;
 		public String link;
 		public String author;
@@ -301,7 +393,20 @@ public class RSSChannelRefresh extends DefaultHandler
 		public RSSChannelPost()
 		{
 			/* Empty. */
-		}		
+		}
+		
+		public void setDate(String str)
+		{
+			date = parseDate(str);
+			
+			if (date == null)
+				date = new Date();
+		}
+		
+		public String getDate()
+		{
+			return dateFormats[dateFormat_default].format(mPostBuf.date);
+		}
 	}
 }
 
