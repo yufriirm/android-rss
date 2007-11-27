@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.ContentURI;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -46,7 +47,7 @@ public class RSSPostList extends ListActivity
 //		list.setLayoutParams(listNoMargins);
 		
 		mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null);
-
+		
 		ListAdapter adapter = new RSSPostListAdapter(mCursor, this);
 
 //        ListAdapter adapter = new SimpleCursorAdapter(this,
@@ -60,12 +61,9 @@ public class RSSPostList extends ListActivity
 	{
 		super.onStart();
 		
-		ContentResolver cr = getContentResolver();
-
-		/* Resolve the channel title by CHANNEL_ID. */
-		long channelId = 
-		  mCursor.getLong(mCursor.getColumnIndex(RSSReader.Posts.CHANNEL_ID));
-
+		long channelId = new Long(getIntent().getData().getPathSegment(1));
+		
+		ContentResolver cr = getContentResolver();		
 		Cursor cChannel = cr.query(RSSReader.Channels.CONTENT_URI.addId(channelId),
 		  new String[] { RSSReader.Channels.LOGO, RSSReader.Channels.ICON, RSSReader.Channels.TITLE }, null, null, null);
 
