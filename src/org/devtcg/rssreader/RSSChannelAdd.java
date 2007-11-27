@@ -82,12 +82,12 @@ public class RSSChannelAdd extends Activity
 		
 		mTitleText = (EditText)findViewById(R.id.name);
 		mURLText = (EditText)findViewById(R.id.url);
-		mIcon = (ImageView)findViewById(R.id.icon);
-		
-		mIcon.setImageResource(R.drawable.feedicon);
-		
-		Button downloadIcon = (Button)findViewById(R.id.download_icon);
-		downloadIcon.setOnClickListener(mDownloadIconListener);
+//		mIcon = (ImageView)findViewById(R.id.icon);
+//		
+//		mIcon.setImageResource(R.drawable.feedicon);
+//		
+//		Button downloadIcon = (Button)findViewById(R.id.download_icon);
+//		downloadIcon.setOnClickListener(mDownloadIconListener);
 		
 		Button downloadName = (Button)findViewById(R.id.download_name);
 		downloadName.setOnClickListener(mDownloadNameListener);
