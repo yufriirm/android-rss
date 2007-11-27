@@ -91,7 +91,8 @@ public class RSSPostListRow extends ViewGroup
 	protected void onMeasure(int widthSpec, int heightSpec)
 	{
 		int w = View.MeasureSpec.getSize(widthSpec);
-		
+
+		/* TODO: Honor mSubject LayoutParams()? */
 		mSubject.measure(widthSpec, heightSpec);
 		mDate.measure
 		 (getChildMeasureSpec(widthSpec, 0, mDate.getLayoutParams().width),
@@ -139,7 +140,6 @@ public class RSSPostListRow extends ViewGroup
 
 		mSubject.setText(cursor, cursor.getColumnIndex(RSSReader.Posts.TITLE));
 
-		/* TODO */
 		String datestr = cursor.getString(cursor.getColumnIndex(RSSReader.Posts.DATE));
 
 		try
