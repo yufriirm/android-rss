@@ -8,21 +8,13 @@ import java.util.HashMap;
 
 import org.devtcg.rssprovider.RSSReader;
 
-import android.app.AlarmManager;
 import android.app.ListActivity;
-import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ContentURI;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -49,7 +41,8 @@ public class RSSChannelList extends ListActivity
 	
 //	private IRSSReaderService mService;
 	
-	private final Handler mRefreshHandler = new Handler();
+	private Handler mRefreshHandler;
+	private HashMap<Long, Thread> mRefreshThreads;
 	
     private static final String[] PROJECTION = new String[] {
       RSSReader.Channels._ID, RSSReader.Channels.ICON,
@@ -59,6 +52,8 @@ public class RSSChannelList extends ListActivity
     protected void onCreate(Bundle icicle)
     {
         super.onCreate(icicle);
+        
+        setContentView(R.layout.channel_list);
 
         Intent intent = getIntent();
         if (intent.getData() == null)
@@ -212,16 +207,19 @@ public class RSSChannelList extends ListActivity
     
     private final void deleteChannel()
     {
-    	String channelId;
-    	
-		mCursor.moveTo(getSelection());
-		
-		channelId = mCursor.getString
-		  (mCursor.getColumnIndex(RSSReader.Channels._ID));
+    	long channelId = getSelectionRowID();
+
+    	Thread refresh;
+
+    	if (mRefreshThreads != null &&
+    	    (refresh = mRefreshThreads.remove(channelId)) != null)
+    	{
+    		/* TODO: Stop the thread. */
+    	}
 
 		/* Delete related posts. */
 		getContentResolver().delete(RSSReader.Posts.CONTENT_URI,
-    	  "channel_id=?", new String[] { channelId });
+    	  "channel_id=?", new String[] { new Long(channelId).toString() });
 
 		mCursor.deleteRow();
     }
@@ -240,10 +238,24 @@ public class RSSChannelList extends ListActivity
      * we want to refresh. */
     private final void refreshChannel()
     {
-    	String rssurl = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels.URL));
-
+    	/* We don't initialize these unless the user requests a refresh.
+    	 * The common case is that the background service (not finished
+    	 * yet) will handle refresh.
+    	 */
+    	if (mRefreshHandler == null)
+    		mRefreshHandler = new Handler();
+    	
+    	if (mRefreshThreads == null)
+    		mRefreshThreads = new HashMap<Long, Thread>();
+    	
     	long channelId =
-    	  mCursor.getInt(mCursor.getColumnIndex(RSSReader.Channels._ID));
+      	  mCursor.getInt(mCursor.getColumnIndex(RSSReader.Channels._ID));
+    	
+    	/* Don't refresh the same channel more than once. */
+    	if (mRefreshThreads.containsKey(channelId) == true)
+    		return;
+
+    	String rssurl = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels.URL));
 
     	/* TODO: Is there a generalization of getListView().getSelectedView() we can use here?
     	 * http://groups.google.com/group/android-developers/browse_thread/thread/4070126fd996001c */
@@ -254,7 +266,14 @@ public class RSSChannelList extends ListActivity
     	
 		Runnable refresh = new RefreshRunnable(mRefreshHandler, row, channelId, rssurl); 
 
-    	(new Thread(refresh)).start();
+    	Thread t = new Thread(refresh);
+    	
+    	/* Manage active threads so we a) don't refresh an already refreshing
+    	 * channel, and b) we can stop the thread if the user deletes the
+    	 * channel. */
+    	mRefreshThreads.put(channelId, t);
+    	
+    	t.start();
     }
     
     private static class RSSChannelListAdapter extends CursorAdapter implements Filterable
@@ -319,21 +338,22 @@ public class RSSChannelList extends ListActivity
     	public void run()
     	{
 			Log.e("RSSChannelList", "Here we go: " + mRSSURL + "...");
-			
+
 			mHandler.post(new Runnable() {
 				public void run()
 				{
 					mRow.startRefresh();
 				}
 			});
-			
+
 	    	new RSSChannelRefresh(getContentResolver()).
 	    	  syncDB(mHandler, mChannelID, mRSSURL);
 	    	
 	    	mHandler.post(new Runnable() {
 	    		public void run()
 	    		{
-	    			mRow.finishRefresh();
+	    			mRow.finishRefresh(mChannelID);
+	    			mRefreshThreads.remove(mChannelID);
 	    		}
 	    	});
     	}
