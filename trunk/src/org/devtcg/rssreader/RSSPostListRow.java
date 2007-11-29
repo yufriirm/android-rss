@@ -110,7 +110,7 @@ public class RSSPostListRow extends ViewGroup
 			/* Attempt to figure out if the last line "bleeds" into the date.
 			 * If it does, we need to arbitrarily force our layout one line
 			 * longer. */
-			float linew = mSubject.getLayout().getLineRight(lines - 1);
+			float linew = mSubject.getLayout().getLineRight(lines - 1);			
 			
 			if ((linew + 10) > (w - mDate.getMeasuredWidth()))
 				h += mDate.getMeasuredHeight();
