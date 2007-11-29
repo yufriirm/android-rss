@@ -346,9 +346,17 @@ public class RSSChannelList extends ListActivity
 				}
 			});
 
-	    	new RSSChannelRefresh(getContentResolver()).
-	    	  syncDB(mHandler, mChannelID, mRSSURL);
-	    	
+			try
+			{
+				new RSSChannelRefresh(getContentResolver()).
+				  syncDB(mHandler, mChannelID, mRSSURL);
+			}
+			catch (Exception e)
+			{
+				/* TODO: Handle me somehow... */
+				Log.d("RSSChannelList", Log.getStackTraceString(e));
+			}
+
 	    	mHandler.post(new Runnable() {
 	    		public void run()
 	    		{
