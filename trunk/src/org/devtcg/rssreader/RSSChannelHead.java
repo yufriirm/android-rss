@@ -63,8 +63,6 @@ public class RSSChannelHead extends LinearLayout
 	@Override
 	protected void dispatchDraw(Canvas canvas)
 	{
-		Log.d("RSSChannelHead", "dispatchDraw");
-
 		Rect r = mRect;
 
 		getDrawingRect(r);
