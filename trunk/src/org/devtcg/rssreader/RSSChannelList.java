@@ -103,7 +103,7 @@ public class RSSChannelList extends ListActivity
 //    		editor.commit();
 //    	}
     }
-    
+
 //    private ServiceConnection mServiceConn = new ServiceConnection()
 //    {
 //    	public void onServiceConnected(ComponentName className, IBinder service)
@@ -206,7 +206,7 @@ public class RSSChannelList extends ListActivity
     		refreshAllChannels();
     		return true;    		
     	}
-    	
+
     	return super.onOptionsItemSelected(item);
     }
     
@@ -301,7 +301,7 @@ public class RSSChannelList extends ListActivity
 		}
     }
     
-    private final class RefreshRunnable implements Runnable
+    private class RefreshRunnable implements Runnable
     {
     	private Handler mHandler;
     	private RSSChannelListRow mRow;
