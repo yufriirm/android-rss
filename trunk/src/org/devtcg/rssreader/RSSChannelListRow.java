@@ -137,10 +137,28 @@ public class RSSChannelListRow extends RelativeLayout
 		Log.d("RSSChannelListRow", "Switch to value-based, update to: " + progress);
 	}
 	
-	public void finishRefresh()
+	public void finishRefresh(Cursor cursor)
 	{
 		Log.d("RSSChannelListRow", "Finished refresh, reset original view...");
-		mCount.setVisibility(VISIBLE);
+		
 		mRefresh.setVisibility(GONE);
+		bindView(cursor);		
+		mCount.setVisibility(VISIBLE);
+	}
+	
+	public void finishRefresh(long channelId)
+	{
+		Cursor cursor = getContext().getContentResolver().query
+		 (RSSReader.Channels.CONTENT_URI.addId(channelId),
+		  new String[] { RSSReader.Channels._ID, RSSReader.Channels.TITLE, RSSReader.Channels.ICON },
+		  null, null, null);
+		
+		/* Hmm, they must have deleted this channel while we were
+		 * refreshing?  OK, we can deal... */
+		if (cursor.count() < 1)
+			return;
+		
+		cursor.first();
+		finishRefresh(cursor);
 	}
 }
