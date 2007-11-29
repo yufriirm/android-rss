@@ -12,6 +12,7 @@ package org.devtcg.rssreader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,6 +59,7 @@ public class RSSChannelRefresh extends DefaultHandler
 	private static final int STATE_IN_ITEM_DESC = (1 << 5);
 	private static final int STATE_IN_ITEM_DATE = (1 << 6);
 	private static final int STATE_IN_ITEM_AUTHOR = (1 << 7);
+	private static final int STATE_IN_TITLE = (1 << 8);
 	
 	private static HashMap<String, Integer> mStateMap;
 	
@@ -110,134 +112,51 @@ public class RSSChannelRefresh extends DefaultHandler
 	public RSSChannelRefresh(ContentResolver resolver)
 	{
 		super();
-		
 		mContent = resolver;
 	}
-	
+
 	/*
-	 * Simple wrapper class that shows how much data is being read, 
-	 * as it's being read.  This enables us to create a ProgressBar
-	 * experience for the user when the Content-Length header is
-	 * found on an HTTP stream.
+	 * Note that if syncDB is called with id == -1, this class will interpret
+	 * that to mean that a new channel is being added (and also tested) so
+	 * the first meaningful piece of data encountered will trigger an insert
+	 * into the database.
+	 * 
+	 * This logic is all just terrible, but this entire class needs to be
+	 * scrapped and redone to make room for improved cooperation with the rest
+	 * of the application.
 	 */
-	private class ProgressInputStream extends InputStream
-	{
-		private InputStream mWrapped;
-		private Handler mAnnounce;
-		
-		private long mRecvdLast;
-		private long mRecvd;
-		private long mTotal;
-		
-		public ProgressInputStream(InputStream in, Handler announce, long total)
-		{
-			mWrapped = in;
-			mAnnounce = announce;
-			mRecvd = 0;
-			mTotal = total;
-		}
-		
-		protected void announceReceipt(long len)
-		{
-			mRecvd += len;
-			assert(mRecvd <= mTotal);
-
-			/* Only update percentage every 1k. */
-			if (mRecvd - mRecvdLast >= 1024)
-			{
-				Message step = mAnnounce.obtainMessage();
-				step.arg1 = (int)(((float)mRecvd / (float)mTotal) * 100.0);
-				mAnnounce.sendMessage(step);
-				
-				mRecvdLast = mRecvd;
-			}
-		}
-		
-		public int read() throws IOException
-		{
-			int b = mWrapped.read();
-			
-			if (b >= 0) 
-				announceReceipt(1);
-			
-			return b;
-		}
-		
-		public int read(byte[] b, int off, int len) throws IOException
-		{
-			int n = mWrapped.read(b, off, len);
-			
-			if (n >= 0)
-				announceReceipt(n);
-			
-			return n;
-		}
-
-		public long skip(long n) throws IOException
-		{
-			long skipped = mWrapped.skip(n);
-			
-			if (skipped >= 0)
-				announceReceipt(skipped);
-			
-			return skipped;
-		}
-		
-		public void close() throws IOException { mWrapped.close(); }		
-		public int read(byte[] b) throws IOException { return read(b, 0, b.length); }
-		public int available() throws IOException { return mWrapped.available(); }
-	}
-
-	public void syncDB(Handler h, long id, String rssurl)
+	public long syncDB(Handler h, long id, String rssurl)
+	  throws Exception
 	{
 		mHandler = h;
 		mID = id;
 		mRSSURL = rssurl;
 
-		try
-		{
-			SAXParserFactory spf = SAXParserFactory.newInstance();
-			SAXParser sp = spf.newSAXParser();
-			XMLReader xr = sp.getXMLReader();
+		SAXParserFactory spf = SAXParserFactory.newInstance();
+		SAXParser sp = spf.newSAXParser();
+		XMLReader xr = sp.getXMLReader();
 
-			xr.setContentHandler(this);
-			xr.setErrorHandler(this);
+		xr.setContentHandler(this);
+		xr.setErrorHandler(this);
 
-			//URL url = new URL(mRSSURL);
-
-			HttpClient client = new HttpClient();
-			client.getHttpConnectionManager().getParams().setConnectionTimeout(30000);
-
-			GetMethod get = new GetMethod(mRSSURL);
-			get.setFollowRedirects(true);
-
-			int result = client.executeMethod(get);
-			Log.d("RSSChannelRefresh", "GET " + mRSSURL + " = " + result);
-
-			long len = get.getResponseContentLength();
-			Log.d("RSSChannelRefresh", "Content-Length: " + len);
-			
-			InputStream stream = get.getResponseBodyAsStream();
-			
-			if (len > 0)
-				stream = new ProgressInputStream(stream, mHandler, len);
-
-			xr.parse(new InputSource(stream));
-		}
-		catch (Exception e)
-		{
-			String msg = e.getMessage();
-			
-			if (msg != null)
-				Log.e(TAG, e.getMessage());
-			else
-				Log.e(TAG, "what the hell?");
-		}
+		URL url = new URL(mRSSURL);
+		xr.parse(new InputSource(url.openStream()));
+		
+		return mID;
 	}
 
 	public void startElement(String uri, String name, String qName,
 			Attributes attrs)
 	{
+		/* HACK: when we see <title> outside of an <item>, assume it's the
+		 * feed title.  Only do this when we are inserting a new feed. */
+		if (mID == -1 && 
+		    qName.equals("title") && (mState & STATE_IN_ITEM) == 0)
+		{
+			mState |= STATE_IN_TITLE;
+			return;
+		}
+		
 		Integer state = mStateMap.get(qName);
 
 		if (state != null)
@@ -259,19 +178,25 @@ public class RSSChannelRefresh extends DefaultHandler
 	public void endElement(String uri, String name, String qName)
 	{
 		Integer state = mStateMap.get(qName);
-		
+
 		if (state != null)
 		{
 			mState &= ~(state.intValue());
-			
+
 			if (state.intValue() == STATE_IN_ITEM)
 			{
+				if (mID == -1)
+				{
+					Log.d(TAG, "Oops, </item> found before feed title and our parser sucks too much to deal.");
+					return;
+				}
+				
 				String[] dupProj = 
 				  new String[] { RSSReader.Posts._ID };
-				
+
 				ContentURI listURI =
 				  RSSReader.Posts.CONTENT_URI_LIST.addId(new Long(mID).longValue());
-				
+
 				Cursor dup = mContent.query(listURI,
 					dupProj, "title = ? AND url = ?",
 					new String[] { mPostBuf.title, mPostBuf.link}, null);
@@ -297,6 +222,26 @@ public class RSSChannelRefresh extends DefaultHandler
 
 	public void characters(char ch[], int start, int length)
 	{
+		/* HACK: This is the other side of the above hack in startElement. */
+		if (mID == -1 && (mState & STATE_IN_TITLE) != 0)
+		{
+			ContentValues values = new ContentValues();
+			
+			values.put(RSSReader.Channels.TITLE, new String(ch, start, length));
+			values.put(RSSReader.Channels.URL, mRSSURL);
+			
+			ContentURI added =
+			  mContent.insert(RSSReader.Channels.CONTENT_URI, values);
+			
+			mID = new Long(added.getPathSegment(1));
+			
+			/* There's no reason we need to do this ever, but we'll just be
+			 * good about removing this awful hack from runtime data. */
+			mState &= ~STATE_IN_TITLE;
+			
+			return;
+		}
+		
 		if ((mState & STATE_IN_ITEM) == 0)
 			return;
 		
