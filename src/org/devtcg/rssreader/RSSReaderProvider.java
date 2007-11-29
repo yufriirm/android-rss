@@ -21,7 +21,8 @@ import android.util.Log;
 
 import java.util.HashMap;
 
-public class RSSReaderProvider extends ContentProvider {
+public class RSSReaderProvider extends ContentProvider
+{
 	private SQLiteDatabase mDB;
 	
 	private static final String TAG = "RSSReaderProvider";
@@ -72,7 +73,7 @@ public class RSSReaderProvider extends ContentProvider {
 		{
 			assert(newVersion == DATABASE_VERSION);
 			Log.w(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion + "...");
-			
+
 			switch(oldVersion)
 			{
 			/* This doesn't work, and I don't know why... */
@@ -85,12 +86,12 @@ public class RSSReaderProvider extends ContentProvider {
 				db.execSQL("INSERT INTO rssreader_post SELECT * FROM rssreader_post_tmp;");
 				db.execSQL("DROP TABLE rssreader_post_tmp;");
 				break;
-				
+
 			case 5:
 				db.execSQL("ALTER TABLE rssreader_channel ADD COLUMN icon BLOB;");
 				db.execSQL("ALTER TABLE rssreader_channel ADD COLUMN logo BLOB;");
 				break;
-				
+
 			default:
 				Log.w(TAG, "Version too old, wiping out database contents...");
 				db.execSQL("DROP TABLE IF EXISTS rssreader_channel;");
