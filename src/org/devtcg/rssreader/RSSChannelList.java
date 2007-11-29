@@ -45,9 +45,11 @@ public class RSSChannelList extends ListActivity
 	
 	private Cursor mCursor;
 	
-	private boolean mFirstTime;
+//	private boolean mFirstTime;
 	
-	private IRSSReaderService mService;
+//	private IRSSReaderService mService;
+	
+	private final Handler mRefreshHandler = new Handler();
 	
     private static final String[] PROJECTION = new String[] {
       RSSReader.Channels._ID, RSSReader.Channels.ICON,
@@ -70,14 +72,16 @@ public class RSSChannelList extends ListActivity
 //        bindService(new Intent(this, RSSReaderService.class),
 //          null, mServiceConn, Context.BIND_AUTO_CREATE);
         
-        SharedPreferences settings = getSharedPreferences(TAG_PREFS, 0);
-        mFirstTime = settings.getBoolean("firstTime", true);
+//        SharedPreferences settings = getSharedPreferences(TAG_PREFS, 0);
+//        mFirstTime = settings.getBoolean("firstTime", true);
         
         /*
          * If this is the first time the user has opened our app ever, 
          * install the RSSReaderService_Alarm as has been scheduled for
          * next device reboot.  After `firstTime`, RSSReaderService_Setup
-         * will handle our setup at BOOT_COMPLETED. 
+         * will handle our setup at BOOT_COMPLETED.
+         * 
+         * TODO: There must be a more appropriate way to handle this?
          */
 //        if (mFirstTime == true)
 //        	RSSReaderService_Setup.setupAlarm(this);
@@ -91,29 +95,29 @@ public class RSSChannelList extends ListActivity
     {
     	super.onStop();
     	
-    	if (mFirstTime == true)
-    	{
-    		SharedPreferences settings = getSharedPreferences(TAG_PREFS, 0);
-    		SharedPreferences.Editor editor = settings.edit();
-    		editor.putBoolean("firstTime", false);
-    		editor.commit();
-    	}
+//    	if (mFirstTime == true)
+//    	{
+//    		SharedPreferences settings = getSharedPreferences(TAG_PREFS, 0);
+//    		SharedPreferences.Editor editor = settings.edit();
+//    		editor.putBoolean("firstTime", false);
+//    		editor.commit();
+//    	}
     }
     
-    private ServiceConnection mServiceConn = new ServiceConnection()
-    {
-    	public void onServiceConnected(ComponentName className, IBinder service)
-    	{
-    		Log.d(TAG, "onServiceConnected");
-    		mService = IRSSReaderService.Stub.asInterface((IBinder)service);
-    	}
-
-    	public void onServiceDisconnected(ComponentName className)
-    	{
-    		Log.d(TAG, "onServiceDisconnected");
-    		mService = null;
-    	}
-    };
+//    private ServiceConnection mServiceConn = new ServiceConnection()
+//    {
+//    	public void onServiceConnected(ComponentName className, IBinder service)
+//    	{
+//    		Log.d(TAG, "onServiceConnected");
+//    		mService = IRSSReaderService.Stub.asInterface((IBinder)service);
+//    	}
+//
+//    	public void onServiceDisconnected(ComponentName className)
+//    	{
+//    		Log.d(TAG, "onServiceDisconnected");
+//    		mService = null;
+//    	}
+//    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -161,7 +165,7 @@ public class RSSChannelList extends ListActivity
 
     	return true;
     }
-    
+
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id)
     {
@@ -179,7 +183,7 @@ public class RSSChannelList extends ListActivity
     		startActivity(new Intent(Intent.VIEW_ACTION, uri));
     	}
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(Menu.Item item)
     {
@@ -221,7 +225,7 @@ public class RSSChannelList extends ListActivity
 
 		mCursor.deleteRow();
     }
-    
+
     private final void refreshAllChannels()
     {
     	if (mCursor.first() == false)
@@ -236,44 +240,21 @@ public class RSSChannelList extends ListActivity
      * we want to refresh. */
     private final void refreshChannel()
     {
-    	final String id = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels._ID));
-    	final String rssurl = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels.URL));
+    	String rssurl = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels.URL));
 
     	long channelId =
     	  mCursor.getInt(mCursor.getColumnIndex(RSSReader.Channels._ID));
-    	
+
     	/* TODO: Is there a generalization of getListView().getSelectedView() we can use here?
     	 * http://groups.google.com/group/android-developers/browse_thread/thread/4070126fd996001c */
-    	final RSSChannelListRow row =
+    	RSSChannelListRow row =
     	  ((RSSChannelListAdapter)getListAdapter()).getViewByRowID(channelId);
     	
-		final RSSChannelRefreshHandler handler =
-		  new RSSChannelRefreshHandler(row);
+    	assert(row != null);
+    	
+		Runnable refresh = new RefreshRunnable(mRefreshHandler, row, channelId, rssurl); 
 
-    	assert(row != null);  
-    	row.startRefresh();
-    	
-    	Thread t = new Thread()
-    	{
-    		/* Only let one of these network download threads run at a time.
-    		 * I should really think of a better way to deal with this case,
-    		 * but I'm too lazy for now... */  
-    		public synchronized void run()
-    		{
-    			Log.e("RSSChannelList", "Here we go: " + rssurl + "...");
-    			
-    	    	new RSSChannelRefresh(getContentResolver()).
-    	    	  syncDB(handler, id, rssurl);
-    	    	
-    	    	Message done = handler.obtainMessage();
-    	    	done.arg1 = 0xDEADBEEF;
-    	    	handler.sendMessage(done);
-    	    	
-    	    	Log.i("RSSChannelList", "Sent 0xDEADBEEF");
-       		}
-    	};
-    	
-    	t.start();
+    	(new Thread(refresh)).start();
     }
     
     private static class RSSChannelListAdapter extends CursorAdapter implements Filterable
@@ -282,13 +263,13 @@ public class RSSChannelList extends ListActivity
     	 * it does not currently.  Hopefully this will be fixed in future
     	 * releases. */
     	private HashMap<Long, RSSChannelListRow> rowMap;
-    	
+
 		public RSSChannelListAdapter(Cursor c, Context context)
 		{
 			super(c, context);
 			rowMap = new HashMap<Long, RSSChannelListRow>();
 		}
-		
+
 		protected void updateRowMap(Cursor cursor, RSSChannelListRow row)
 		{
 			Long channelId =
@@ -320,32 +301,41 @@ public class RSSChannelList extends ListActivity
 		}
     }
     
-    private class RSSChannelRefreshHandler extends Handler
+    private final class RefreshRunnable implements Runnable
     {
-    	RSSChannelListRow mRow;
-    	
-    	public RSSChannelRefreshHandler(RSSChannelListRow row)
+    	private Handler mHandler;
+    	private RSSChannelListRow mRow;
+    	private long mChannelID;
+    	private String mRSSURL;
+
+    	public RefreshRunnable(Handler handler, RSSChannelListRow row, long channelId, String rssurl)
     	{
-    		super();
+    		mHandler = handler;
     		mRow = row;
+    		mChannelID = channelId;
+    		mRSSURL = rssurl;
     	}
-    	
-    	public void handleMessage(Message msg)
+
+    	public void run()
     	{
-    		if (msg.arg1 == 0xDEADBEEF)
-    		{
-    			Log.i("RSSChannelList", "Got 0xDEADBEEF");
-    			mRow.finishRefresh();
-    			
-    			/* TODO: We should use the notification system (setNotificationUri)
-    			 * in the provider to help facilitate this. */
-    			mCursor.requery();
-    		}
-    		else
-    		{
-        		Log.d("RSSChannelList", "Got a message: " + msg.arg1);
-    			mRow.updateRefresh(msg.arg1);
-    		}
-    	}    	 
+			Log.e("RSSChannelList", "Here we go: " + mRSSURL + "...");
+			
+			mHandler.post(new Runnable() {
+				public void run()
+				{
+					mRow.startRefresh();
+				}
+			});
+			
+	    	new RSSChannelRefresh(getContentResolver()).
+	    	  syncDB(mHandler, mChannelID, mRSSURL);
+	    	
+	    	mHandler.post(new Runnable() {
+	    		public void run()
+	    		{
+	    			mRow.finishRefresh();
+	    		}
+	    	});
+    	}
     }
 }

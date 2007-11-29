@@ -42,7 +42,7 @@ public class RSSChannelRefresh extends DefaultHandler
 	private static final String TAG = "RSSChannelRefresh";
 
 	private Handler mHandler;
-	private String mID;
+	private long mID;
 	private String mRSSURL;
 	
 	private ContentResolver mContent;
@@ -188,7 +188,7 @@ public class RSSChannelRefresh extends DefaultHandler
 		public int available() throws IOException { return mWrapped.available(); }
 	}
 
-	public void syncDB(Handler h, String id, String rssurl)
+	public void syncDB(Handler h, long id, String rssurl)
 	{
 		mHandler = h;
 		mID = id;
