@@ -88,10 +88,10 @@ public class RSSPostView extends Activity
 	{
 		super.onCreateOptionsMenu(menu);
 
-    	menu.add(0, NEXT_POST_ID, "Next Post").
-    	  setShortcut(KeyEvent.KEYCODE_3, 0, KeyEvent.KEYCODE_N);
-		menu.add(0, PREV_POST_ID, "Previous Post").
-		  setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_P);
+//    	menu.add(0, NEXT_POST_ID, "Next Post").
+//    	  setShortcut(KeyEvent.KEYCODE_3, 0, KeyEvent.KEYCODE_N);
+//		menu.add(0, PREV_POST_ID, "Previous Post").
+//		  setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_P);
 		
 		return true;
 	}
