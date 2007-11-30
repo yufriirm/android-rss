@@ -31,7 +31,6 @@ import android.widget.ImageView;
 
 public class RSSChannelAdd extends Activity
 {
-	public EditText mTitleText;
 	public EditText mURLText;
 	
 	/* We need this to not block when accessing the RSS feed for validation
@@ -45,7 +44,6 @@ public class RSSChannelAdd extends Activity
 		super.onCreate(icicle);
 		setContentView(R.layout.channel_add);
 		
-		//mTitleText = (EditText)findViewById(R.id.name);
 		mURLText = (EditText)findViewById(R.id.url);
 		
 		Button add = (Button)findViewById(R.id.add);
@@ -57,6 +55,8 @@ public class RSSChannelAdd extends Activity
 	{
 		super.onStart();
 		
+		/* Position cursor at the end of the widget; seems easier to use
+		 * that way. */
 		Bundle state = mURLText.saveState();
 
 		Integer endpos = mURLText.length();

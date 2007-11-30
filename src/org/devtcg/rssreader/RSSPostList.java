@@ -59,6 +59,8 @@ public class RSSPostList extends ListActivity
 		/* TODO: Check if RSSReader.Channels.LOGO exists and use it. */
 		RSSChannelHead head = (RSSChannelHead)findViewById(R.id.postListHead);
 		head.setLogo(cChannel);
+		
+		cChannel.close();
 	}
 
     @Override

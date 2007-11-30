@@ -8,7 +8,7 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content" />
     
-	<ScrollView
+	<view class="org.devtcg.rssreader.RSSPostView$PostScrollView"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content">
     
@@ -32,6 +32,6 @@
 			
 		</LinearLayout>
 	
-	</ScrollView>
+	</view>
 	
 </LinearLayout>
