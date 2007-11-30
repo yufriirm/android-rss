@@ -22,41 +22,52 @@ public class RSSPostView extends Activity
 	
 	private static final String[] PROJECTION = new String[] {
 		RSSReader.Posts._ID, RSSReader.Posts.CHANNEL_ID,
-		RSSReader.Posts.TITLE, RSSReader.Posts.BODY, RSSReader.Posts.READ };
+		RSSReader.Posts.TITLE, RSSReader.Posts.BODY, RSSReader.Posts.READ,
+		RSSReader.Posts.URL };
 	
-	private long mChannelID;
+	private long mChannelID = -1;
+	
+	private Cursor mCursor;
 	
 	@Override
 	protected void onCreate(Bundle icicle)
 	{
 		super.onCreate(icicle);		
 		setContentView(R.layout.post_view);
+
+		mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null, null);
 		
-		/* TODO: Should this be in onStart() or onResume() or something? */
-		//initWithData();
+		/* TODO: Should this be in onStart() or onResume() or something?  */
+		initWithData();
 	}
 	
 	@Override
 	protected void onStart()
-	{	
+	{
 		super.onStart();
-		
-		ContentResolver cr = getContentResolver();
 
-		/* Get the post data, including a reference to the CHANNEL_ID. */
-		Cursor cPost = cr.query(getIntent().getData(), PROJECTION, null, null, null);
-
-		assert(cPost.count() == 1);
-		cPost.first();
+		assert(mCursor.count() == 1);
+		mCursor.first();
 
 		/* Set the post to read. */
-		cPost.updateInt(cPost.getColumnIndex(RSSReader.Posts.READ), 1);
-		cPost.commitUpdates();
+		mCursor.updateInt(mCursor.getColumnIndex(RSSReader.Posts.READ), 1);
+		mCursor.commitUpdates();
+	}
+	
+	private void initWithData()
+	{	
+		ContentResolver cr = getContentResolver();
+
+		assert(mCursor.count() == 1);
+		mCursor.first();
 
 		/* Resolve the channel title by CHANNEL_ID. */
-		mChannelID = new Long
-		  (cPost.getString(cPost.getColumnIndex(RSSReader.Posts.CHANNEL_ID))).
-		    longValue();
+		if (mChannelID < 0)
+		{
+			mChannelID = new Long
+			  (mCursor.getString(mCursor.getColumnIndex(RSSReader.Posts.CHANNEL_ID))).
+			    longValue();
+		}
 
 		Cursor cChannel = cr.query(RSSReader.Channels.CONTENT_URI.addId(mChannelID),
 		  new String[] { RSSReader.Channels.ICON, RSSReader.Channels.LOGO, RSSReader.Channels.TITLE }, null, null, null);
@@ -69,7 +80,7 @@ public class RSSPostView extends Activity
 		head.setLogo(cChannel);
 		
 		TextView postTitle = (TextView)findViewById(R.id.postTitle);
-		postTitle.setText(cPost, cPost.getColumnIndex(RSSReader.Posts.TITLE));
+		postTitle.setText(mCursor, mCursor.getColumnIndex(RSSReader.Posts.TITLE));
 		
 		WebView postText = (WebView)findViewById(R.id.postText);
 		
@@ -77,12 +88,59 @@ public class RSSPostView extends Activity
 		 * possible.  Black will do for now. */
 		String html =
 			"<html><head><style type=\"text/css\">body { background-color: #201c19; color: white; } a { color: #ddf; }</style></head><body>" +
-			cPost.getString(cPost.getColumnIndex(RSSReader.Posts.BODY)) +
+			getBody() +
 			"</body></html>";
 
 		postText.loadData(html, "text/html", "utf-8");
 	}
-
+	
+	/* Apply some simple heuristics to the post text to determine what special
+	 * features we want to show. */
+	private String getBody()
+	{
+		String body =
+		  mCursor.getString(mCursor.getColumnIndex(RSSReader.Posts.BODY));
+		
+		String url =
+		  mCursor.getString(mCursor.getColumnIndex(RSSReader.Posts.URL));
+	
+		if (hasMoreLink(body, url) == false)
+			body += "<p><a href=\"" + url + "\">Read more...</a></p>";
+		
+		/* TODO: We should add a check for "posted by", "written by",
+		 * "posted on", etc, and optionally add our own tagline if
+		 * the information is in the feed. */
+		return body;
+	}
+	
+	private boolean hasMoreLink(String body, String url)
+	{
+		int urlpos;
+		
+		/* Check if the body contains an anchor reference with the
+		 * destination of the read more URL we got from the feed. */
+		if ((urlpos = body.indexOf(url)) > 0)
+		{
+			try
+			{
+				/* TODO: Improve this check with a full look-behind parse. */
+				if (body.charAt(urlpos - 1) != '>')
+					return false;
+			
+				if (body.charAt(urlpos + url.length() + 1) != '<')
+					return false;
+			}
+			catch (IndexOutOfBoundsException e)
+			{
+				return false;
+			}
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
@@ -92,7 +150,7 @@ public class RSSPostView extends Activity
 //    	  setShortcut(KeyEvent.KEYCODE_3, 0, KeyEvent.KEYCODE_N);
 //		menu.add(0, PREV_POST_ID, "Previous Post").
 //		  setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_P);
-		
+
 		return true;
 	}
 	
