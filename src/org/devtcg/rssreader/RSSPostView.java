@@ -57,7 +57,7 @@ public class RSSPostView extends Activity
 		
 		mChannelID = mCursor.getLong(mCursor.getColumnIndex(RSSReader.Posts.CHANNEL_ID));
 		mPostID = new Long(getIntent().getData().getPathSegment(1));
-
+		
 		/* TODO: Should this be in onStart() or onResume() or something?  */
 		initWithData();
 	}
@@ -66,6 +66,11 @@ public class RSSPostView extends Activity
 	protected void onStart()
 	{
 		super.onStart();
+		
+		if (mCursor == null)
+			return;
+		
+		mCursor.first();
 
 		/* Set the post to read. */
 		mCursor.updateInt(mCursor.getColumnIndex(RSSReader.Posts.READ), 1);
@@ -205,6 +210,8 @@ public class RSSPostView extends Activity
 		{
 			menu.add(0, PREV_POST_ID, "Older Post").
 			  setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_RIGHT_BRACKET);
+			
+			menu.setDefaultItem(PREV_POST_ID);
 		}
 		
 		return true;
