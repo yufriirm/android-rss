@@ -16,11 +16,8 @@ import android.database.Cursor;
 import android.net.ContentURI;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MotionEvent;
-import android.view.Menu.Item;
 import android.webkit.WebView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -31,9 +28,9 @@ public class RSSPostView extends Activity
 	private final static int PREV_POST_ID = Menu.FIRST + 1;
 	
 	private static final String[] PROJECTION = new String[] {
-		RSSReader.Posts._ID, RSSReader.Posts.CHANNEL_ID,
-		RSSReader.Posts.TITLE, RSSReader.Posts.BODY, RSSReader.Posts.READ,
-		RSSReader.Posts.URL };
+	  RSSReader.Posts._ID, RSSReader.Posts.CHANNEL_ID,
+	  RSSReader.Posts.TITLE, RSSReader.Posts.BODY, RSSReader.Posts.READ,
+	  RSSReader.Posts.URL };
 	
 	private long mChannelID = -1;
 	private long mPostID = -1;
@@ -48,6 +45,10 @@ public class RSSPostView extends Activity
 	{
 		super.onCreate(icicle);		
 		setContentView(R.layout.post_view);
+		
+//		RSSChannelHead head = (RSSChannelHead)findViewById(R.id.postViewHead);
+//		PostScrollView scroll = (PostScrollView)findViewById(R.id.postViewScroll);
+//		scroll.setChannelHead(head);
 
 		mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null, null);
 		
@@ -60,7 +61,7 @@ public class RSSPostView extends Activity
 		/* TODO: Should this be in onStart() or onResume() or something?  */
 		initWithData();
 	}
-	
+
 	@Override
 	protected void onStart()
 	{
@@ -70,7 +71,7 @@ public class RSSPostView extends Activity
 		mCursor.updateInt(mCursor.getColumnIndex(RSSReader.Posts.READ), 1);
 		mCursor.commitUpdates();
 	}
-	
+
 	private void initWithData()
 	{	
 		ContentResolver cr = getContentResolver();
@@ -84,6 +85,7 @@ public class RSSPostView extends Activity
 		/* Make the view useful. */
 		RSSChannelHead head = (RSSChannelHead)findViewById(R.id.postViewHead);
 		head.setLogo(cChannel);
+		head.setPost(mCursor);
 		
 		cChannel.close();
 
@@ -153,7 +155,7 @@ public class RSSPostView extends Activity
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
 		menu.removeGroup(0);
-		
+
 		if (mNextPostID < 0 || mPrevPostID < 0)
 		{
 	    	Cursor cPostList = getContentResolver().query
@@ -237,12 +239,17 @@ public class RSSPostView extends Activity
     	return super.onOptionsItemSelected(item);
     }
 
-    /* Special ScrollView class that is used to determine if the post title
+    /* 
+     * Special ScrollView class that is used to determine if the post title
      * is currently visible.  If not, it will change it to show the
      * RSSChannelHead to show the title with a flashy animation to show
-     * off Android goodness. */
-    public class PostScrollView extends ScrollView
+     * off Android goodness.
+     */
+    public static class PostScrollView extends ScrollView
     {
+    	private int mTitleTop = 0;
+    	private RSSChannelHead mHead;
+    	
     	public PostScrollView(Context context)
     	{
     		super(context);
@@ -257,11 +264,42 @@ public class RSSPostView extends Activity
     	{
     		super(context, attrs, inflateParams, defStyle);
     	}
-
+    	
+    	public void setChannelHead(RSSChannelHead head)
+    	{
+    		mHead = head;
+    	}
+    	
+    	@Override
+        /* TODO: Overriding computeScroll() does not seem to be an efficient
+         * way to tackle this problem.  Any suggestions for improvement? */ 
     	public void computeScroll()
     	{
     		super.computeScroll();
-    		Log.d("RSSPostScrollView", "x=" + mScrollX + ", y=" + mScrollY);
+
+    		if (mTitleTop < 0)
+    		{
+    			TextView title = (TextView)findViewById(R.id.postTitle);
+
+    			if (title != null)
+    			{
+    				mTitleTop = title.getLineHeight() / 2;
+    				assert(mTitleTop > 0);
+    			}
+    		}
+    		else
+    		{
+    			if (mScrollY > mTitleTop)
+    			{
+    				if (mHead.isPostTitleVisible() == false)
+    					mHead.showPostTitle();
+    			}
+    			else
+    			{
+    				if (mHead.isPostTitleVisible() == true)
+    					mHead.showChannelTitle();
+    			}
+    		}
     	}
     }
 }

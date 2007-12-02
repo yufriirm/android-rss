@@ -20,6 +20,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Menu.Item;
 import android.widget.CursorAdapter;
 import android.widget.Filterable;
 import android.widget.ListAdapter;
@@ -34,6 +35,7 @@ public class RSSChannelList extends ListActivity
 	public static final int INSERT_ID = Menu.FIRST + 1;
 	public static final int REFRESH_ID = Menu.FIRST + 2;
 	public static final int REFRESH_ALL_ID = Menu.FIRST + 3;
+	public static final int EDIT_CHANNEL_ID = Menu.FIRST + 4;
 	
 	private Cursor mCursor;
 	
@@ -130,16 +132,29 @@ public class RSSChannelList extends ListActivity
     {
     	super.onPrepareOptionsMenu(menu);
     	final boolean haveItems = mCursor.count() > 0;
-    	
+
 		menu.removeGroup(Menu.SELECTED_ALTERNATIVE);
-    	
+
     	/* If there are items in the list, add the extra context menu entries
     	 * available on each channel listed. */
     	if (haveItems)
     	{
-    		/* Get initially selected item... 
-    		 * TODO: Use this for Intent.EDIT_ACTION */
-//    		ContentURI uri = getIntent().getData().addId(getSelectionRowID());
+            ContentURI uri = getIntent().getData().addId(getSelectionRowID());
+
+            Menu.Item[] items = new Menu.Item[1];
+            
+            /* Also add any other actions that we don't even know about
+             * yet... */
+            Intent intent = new Intent(null, uri);
+            intent.addCategory(Intent.SELECTED_ALTERNATIVE_CATEGORY);
+            menu.addIntentOptions(Menu.SELECTED_ALTERNATIVE, 0, null, null,
+                                  intent, Menu.NO_SEPARATOR_AFTER, items);
+            
+            /* Give a shortcut to the edit action. */
+            if (items[0] != null)
+                items[0].setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_E);
+            else
+            	Log.d("RSSTest", "boo");
 
     		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
 
@@ -147,17 +162,21 @@ public class RSSChannelList extends ListActivity
   		
     		menu.add(Menu.SELECTED_ALTERNATIVE, REFRESH_ID, "Refresh Channel").
 		  	  setShortcut(0, 0, KeyEvent.KEYCODE_R);
+    		
+    		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
     		  
-    		menu.add(Menu.SELECTED_ALTERNATIVE, DELETE_ID, "Delete Channel").
+            Item edit = menu.add(Menu.SELECTED_ALTERNATIVE, EDIT_CHANNEL_ID, "Edit Channel");
+            edit.setIntent(new Intent(Intent.EDIT_ACTION, uri));
+            edit.setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_E);
+            
+            menu.add(Menu.SELECTED_ALTERNATIVE, DELETE_ID, "Delete Channel").
     		  setShortcut(KeyEvent.KEYCODE_2, 0, KeyEvent.KEYCODE_D);
     		
     		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
+    		
+    		menu.setDefaultItem(EDIT_CHANNEL_ID);
     	}
     	
-    	/* TODO: What does this do?  Found it in the NotesList demo so I just
-    	 * decided to copy it for good measure. */
-//    	menu.setGroupShown(Menu.SELECTED_ALTERNATIVE, haveItems);
-
     	return true;
     }
 

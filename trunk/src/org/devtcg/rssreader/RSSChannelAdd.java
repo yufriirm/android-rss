@@ -4,40 +4,28 @@
 
 package org.devtcg.rssreader;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.devtcg.rssprovider.RSSReader;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.ContentURI;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 
 public class RSSChannelAdd extends Activity
 {
 	public EditText mURLText;
-	
+
 	/* We need this to not block when accessing the RSS feed for validation
 	 * and for name downloads. */
 	protected ProgressDialog mBusy;	
 	final Handler mHandler = new Handler();
-	
+
 	@Override
 	protected void onCreate(Bundle icicle)
 	{
@@ -49,7 +37,7 @@ public class RSSChannelAdd extends Activity
 		Button add = (Button)findViewById(R.id.add);
 		add.setOnClickListener(mAddListener);
 	}
-	
+
 	@Override
 	protected void onStart()
 	{
@@ -65,7 +53,7 @@ public class RSSChannelAdd extends Activity
 		
 		mURLText.restoreState(state);
 	}
-	
+
 	private OnClickListener mAddListener = new OnClickListener()
 	{
 		public void onClick(View v)
@@ -88,7 +76,7 @@ public class RSSChannelAdd extends Activity
 				    		public void run()
 				    		{
 				    			mBusy.dismiss();
-				    		
+
 				    			ContentURI uri = RSSReader.Channels.CONTENT_URI.addId(id);
 				    			setResult(RESULT_OK, uri.toString());
 				    			finish();
@@ -104,9 +92,9 @@ public class RSSChannelAdd extends Activity
 			    			public void run()
 			    			{
 			    				mBusy.dismiss();
-			    				
+
 			    				String errstr = ((errmsgFull != null) ? errmsgFull : errmsg);
-			    				
+
 			    				AlertDialog.show(RSSChannelAdd.this,
 			    				  "Feed error", "An error was encountered while accessing the feed: " + errstr,
 			    				  "OK", true);
