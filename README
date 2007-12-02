@@ -1,0 +1,3 @@
+This project is designed to be loaded into Eclipse.  I apologize for this
+inconvenience and would soon like to include a build environment which also
+supports ant and perhaps GNU make.
