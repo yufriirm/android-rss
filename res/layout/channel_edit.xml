@@ -8,29 +8,28 @@
 	<TextView
 	    android:layout_width="fill_parent" 
 	    android:layout_height="wrap_content" 
-	    android:text="Enter RSS URL:"
+	    android:text="Feed URL:"
 	    />
 
-	<EditText id="@+id/url"
+	<EditText id="@+id/channelEditURL"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:text="http://"
+		android:singleLine="true"
+		/>
+
+	<TextView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="Feed name:"
+		/>
+		
+	<EditText id="@+id/channelEditName"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
 		android:singleLine="true"
 		/>
 
 <!--		
-	<TextView
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="Enter feed name:"
-		/>
-		
-	<EditText id="@+id/name"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:singleLine="true"
-		/>
-		
 	<CheckBox id="@+id/download_name"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
@@ -49,14 +48,13 @@
 		android:layout_height="fill_parent"
 		android:paddingTop="8dip"
 		android:gravity="center_horizontal">
-		
-		<Button id="@+id/add"
+
+		<Button id="@+id/channelEditSave"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Add"
+			android:text="Save"
 			/>
 	
 	</LinearLayout>
 	
 </LinearLayout>
-		

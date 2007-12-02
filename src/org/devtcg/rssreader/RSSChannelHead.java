@@ -109,6 +109,7 @@ public class RSSChannelHead extends LinearLayout
 			mLogoText = new TextView(getContext());
 			mLogoText.setPadding(6, paddingTop, 0, paddingBottom);
 			mLogoText.setTypeface(Typeface.DEFAULT_BOLD);
+			mLogoText.setMaxLines(1);
 			addView(mLogoText, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));			
 		}
 
@@ -121,5 +122,35 @@ public class RSSChannelHead extends LinearLayout
 		setLogo(cursor.getString(cursor.getColumnIndex(RSSReader.Channels.TITLE)),
 		  cursor.getString(cursor.getColumnIndex(RSSReader.Channels.ICON)),
 		  cursor.getString(cursor.getColumnIndex(RSSReader.Channels.LOGO)));
+	}
+	
+	private String mPostTitle;
+	private boolean mPostTitleVisible;
+	
+	public void setPost(String postTitle)
+	{
+		mPostTitle = postTitle;
+	}
+	
+	public void setPost(Cursor cursor)
+	{
+		setPost(cursor.getString(cursor.getColumnIndex(RSSReader.Posts.TITLE)));
+	}
+	
+	public void showPostTitle()
+	{
+		mLogoText.setText(mPostTitle);		
+		mPostTitleVisible = true;
+	}
+	
+	public void showChannelTitle()
+	{
+		mLogoText.setText("Test Channel");
+		mPostTitleVisible = false;
+	}
+	
+	public boolean isPostTitleVisible()
+	{
+		return mPostTitleVisible; 
 	}
 }
