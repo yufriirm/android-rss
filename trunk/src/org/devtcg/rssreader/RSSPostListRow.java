@@ -40,19 +40,19 @@ public class RSSPostListRow extends ViewGroup
 
 	private TextView mSubject;
 	private TextView mDate;
-	
+
 	private Rect mRect;
 	private Paint mGray;
-	
+
 	private static final SimpleDateFormat mDateFmtDB;
 	private static final SimpleDateFormat mDateFmtToday;
 	private static final SimpleDateFormat mDateFmt;
-	
+
 	static
 	{
 		mDateFmtDB = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
 		mDateFmtToday = new SimpleDateFormat("h:mma");
-		
+
 		/* TODO: Format date according to the current locale. */
 		mDateFmt = new SimpleDateFormat("MM/dd/yyyy h:mma");
 	}
@@ -60,7 +60,7 @@ public class RSSPostListRow extends ViewGroup
 	public RSSPostListRow(Context context)
 	{
 		super(context);
-		
+
 		mRect = new Rect();
 		mGray = new Paint();
 		mGray.setStyle(Paint.Style.STROKE);
@@ -71,7 +71,7 @@ public class RSSPostListRow extends ViewGroup
 
 		LayoutParams subjectRules =
 		  new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		
+
 		addView(mSubject, subjectRules);
 
 		mDate = new TextView(context);
@@ -93,7 +93,7 @@ public class RSSPostListRow extends ViewGroup
 		int dateh = mDate.getMeasuredHeight();
 		int selfw = getMeasuredWidth();
 		int selfh = getMeasuredHeight();
-		
+
 		mSubject.layout(mWindowLeft, mWindowTop, 0, 0, subjw, subjh);
 		mDate.layout(mWindowLeft, mWindowTop + selfh - (dateh + 4),
 		  selfw - datew, selfh - (dateh + 4), selfw, selfh - 4);
@@ -116,14 +116,14 @@ public class RSSPostListRow extends ViewGroup
 		if (lines <= 1)
 			h = mSubject.getMeasuredHeight() + mDate.getMeasuredHeight();
 		else
-		{			
+		{
 			h = mSubject.getMeasuredHeight();
-			
+
 			/* Attempt to figure out if the last line "bleeds" into the date.
 			 * If it does, we need to arbitrarily force our layout one line
 			 * longer. */
-			float linew = mSubject.getLayout().getLineRight(lines - 1);			
-			
+			float linew = mSubject.getLayout().getLineRight(lines - 1);	
+
 			if ((linew + 10) > (w - mDate.getMeasuredWidth()))
 				h += mDate.getMeasuredHeight();
 		}
@@ -131,7 +131,7 @@ public class RSSPostListRow extends ViewGroup
 		/* Add a bottom 4px padding. */
 		setMeasuredDimension(w, h + 4);
 	}
-	
+
 	@Override
 	protected void dispatchDraw(Canvas canvas)
 	{
@@ -139,7 +139,7 @@ public class RSSPostListRow extends ViewGroup
 
 		getDrawingRect(r);
 		canvas.drawLine(r.left, r.bottom - 1, r.right, r.bottom - 1, mGray);
-		
+
 		super.dispatchDraw(canvas);
 	}
 
@@ -157,7 +157,7 @@ public class RSSPostListRow extends ViewGroup
 		try
 		{
 			Date date = mDateFmtDB.parse(datestr);
-			
+
 			SimpleDateFormat fmt;
 			Date now = new Date();
 
@@ -172,7 +172,7 @@ public class RSSPostListRow extends ViewGroup
 			{
 				fmt = mDateFmt;
 			}
-			
+
 			mDate.setText(fmt.format(date));
 		}
 		catch (ParseException e)
