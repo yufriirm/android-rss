@@ -52,20 +52,19 @@ public class PostList extends ListActivity
 		super.onCreate(icicle);
 		
 		setContentView(R.layout.post_list);
-		
+
 		mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null);
-		
+
 		ListAdapter adapter = new RSSPostListAdapter(mCursor, this);
         setListAdapter(adapter);
+        
+        initWithData();
 	}
 
-	@Override
-	protected void onStart()
+	private void initWithData()
 	{
-		super.onStart();
-		
 		long channelId = new Long(getIntent().getData().getPathSegment(1));
-		
+
 		ContentResolver cr = getContentResolver();		
 		Cursor cChannel = cr.query(RSSReader.Channels.CONTENT_URI.addId(channelId),
 		  new String[] { RSSReader.Channels.LOGO, RSSReader.Channels.ICON, RSSReader.Channels.TITLE }, null, null, null);
