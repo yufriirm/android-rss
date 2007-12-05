@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSReaderService.java 59 2007-12-02 03:41:15Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,20 +14,17 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.service;
+
+import org.devtcg.rssreader.service.IReaderService;
 
 import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentReceiver;
-import android.os.BinderNative;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.IBinder;
 import android.os.Process;
 import android.util.Log;
 
-public class RSSReaderService extends Service implements Runnable
+public class ReaderService extends Service implements Runnable
 {
 	protected boolean mRunning;
 	private static final String TAG = "RSSReaderService";
@@ -87,7 +84,7 @@ public class RSSReaderService extends Service implements Runnable
 		return mBinder;
 	}
 	
-	private final IRSSReaderService.Stub mBinder = new IRSSReaderService.Stub()
+	private final IReaderService.Stub mBinder = new IReaderService.Stub()
 	{
 		public int getPid()
 		{

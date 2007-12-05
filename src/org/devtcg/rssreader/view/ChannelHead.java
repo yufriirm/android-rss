@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSChannelHead.java 61 2007-12-05 00:07:53Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,11 +14,13 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.view;
 
 import java.util.Map;
 
-import org.devtcg.rssprovider.RSSReader;
+import org.devtcg.rssreader.R;
+import org.devtcg.rssreader.R.drawable;
+import org.devtcg.rssreader.provider.RSSReader;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -43,7 +45,7 @@ import android.widget.TextView;
  * TODO: I have no idea what I'm doing here.  The abstraction for
  * RSSChannelHead seems correct, but the implementation is surely all wrong.
  */
-public class RSSChannelHead extends LinearLayout
+public class ChannelHead extends LinearLayout
 {
 	private ImageView mLogo;
 	private ImageView mIcon;
@@ -58,7 +60,7 @@ public class RSSChannelHead extends LinearLayout
 	private static final int paddingTop = 2;
 	private static final int paddingBottom = 6;
 	
-	public RSSChannelHead(Context context, AttributeSet attrs, Map inflateParams)
+	public ChannelHead(Context context, AttributeSet attrs, Map inflateParams)
 	{
 		super(context, attrs, inflateParams);
 		

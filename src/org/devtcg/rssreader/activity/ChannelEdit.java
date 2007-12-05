@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSChannelEdit.java 59 2007-12-02 03:41:15Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,9 +14,12 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.activity;
 
-import org.devtcg.rssprovider.RSSReader;
+import org.devtcg.rssreader.R;
+import org.devtcg.rssreader.R.id;
+import org.devtcg.rssreader.R.layout;
+import org.devtcg.rssreader.provider.RSSReader;
 
 import android.app.Activity;
 import android.database.Cursor;
@@ -27,7 +30,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class RSSChannelEdit extends Activity
+public class ChannelEdit extends Activity
 {
 	private TextView mURLText;
 	private TextView mTitleText;

@@ -6,7 +6,7 @@
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation; either version 2, or (at your option) any
- * later version.
+ * lateeeer version.
  *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,9 +14,8 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.provider;
 
-import org.devtcg.rssprovider.RSSReader;
 
 import android.content.ContentProvider;
 import android.content.ContentProviderDatabaseHelper;
@@ -329,11 +328,11 @@ public class RSSReaderProvider extends ContentProvider
 	static
 	{
 		URL_MATCHER = new ContentURIParser(ContentURIParser.NO_MATCH);
-		URL_MATCHER.addURI("org.devtcg.rssprovider.RSSReader", "channels", CHANNELS);
-		URL_MATCHER.addURI("org.devtcg.rssprovider.RSSReader", "channels/#", CHANNEL_ID);
-		URL_MATCHER.addURI("org.devtcg.rssprovider.RSSReader", "posts", POSTS);
-		URL_MATCHER.addURI("org.devtcg.rssprovider.RSSReader", "posts/#", POST_ID);
-		URL_MATCHER.addURI("org.devtcg.rssprovider.RSSReader", "postlist/#", CHANNEL_POSTS);	
+		URL_MATCHER.addURI("org.devtcg.rssreader.provider.RSSReader", "channels", CHANNELS);
+		URL_MATCHER.addURI("org.devtcg.rssreader.provider.RSSReader", "channels/#", CHANNEL_ID);
+		URL_MATCHER.addURI("org.devtcg.rssreader.provider.RSSReader", "posts", POSTS);
+		URL_MATCHER.addURI("org.devtcg.rssreader.provider.RSSReader", "posts/#", POST_ID);
+		URL_MATCHER.addURI("org.devtcg.rssreader.provider.RSSReader", "postlist/#", CHANNEL_POSTS);	
 		
 		CHANNEL_LIST_PROJECTION_MAP = new HashMap<String, String>();
 		CHANNEL_LIST_PROJECTION_MAP.put(RSSReader.Channels._ID, "_id");

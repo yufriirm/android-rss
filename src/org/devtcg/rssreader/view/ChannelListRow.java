@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSChannelListRow.java 62 2007-12-05 00:09:11Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,9 +14,11 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.view;
 
-import org.devtcg.rssprovider.RSSReader;
+import org.devtcg.rssreader.R;
+import org.devtcg.rssreader.R.drawable;
+import org.devtcg.rssreader.provider.RSSReader;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -31,7 +33,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class RSSChannelListRow extends RelativeLayout
+public class ChannelListRow extends RelativeLayout
 {
 	private ImageView mIcon;
 	private TextView mName;
@@ -42,7 +44,7 @@ public class RSSChannelListRow extends RelativeLayout
 	private static final int CHANNEL_RIGHT = 2;
 	private static final int CHANNEL_ICON = 3;
 
-	public RSSChannelListRow(Context context)
+	public ChannelListRow(Context context)
 	{
 		super(context);
 

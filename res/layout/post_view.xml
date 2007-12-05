@@ -20,7 +20,7 @@
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content">
 	
-	<view class="org.devtcg.rssreader.RSSChannelHead" id="@+id/postViewHead"
+	<view class="org.devtcg.rssreader.view.ChannelHead" id="@+id/postViewHead"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content" />
     

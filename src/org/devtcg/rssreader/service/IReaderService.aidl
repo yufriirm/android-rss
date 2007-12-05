@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: IRSSReaderService.aidl 59 2007-12-02 03:41:15Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,9 +14,9 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.service;
 
-interface IRSSReaderService
+interface IReaderService
 {
     int getPid();
 }
