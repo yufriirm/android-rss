@@ -51,7 +51,7 @@ public class ChannelList extends ListActivity
 	public static final int INSERT_ID = Menu.FIRST + 1;
 	public static final int REFRESH_ID = Menu.FIRST + 2;
 	public static final int REFRESH_ALL_ID = Menu.FIRST + 3;
-	public static final int EDIT_CHANNEL_ID = Menu.FIRST + 4;
+	public static final int EDIT_ID = Menu.FIRST + 4;
 	
 	private Cursor mCursor;
 	
@@ -166,7 +166,7 @@ public class ChannelList extends ListActivity
     		
     		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
     		  
-            Item edit = menu.add(Menu.SELECTED_ALTERNATIVE, EDIT_CHANNEL_ID, "Edit Channel");
+            Item edit = menu.add(Menu.SELECTED_ALTERNATIVE, EDIT_ID, "Edit Channel");
             edit.setIntent(new Intent(Intent.EDIT_ACTION, uri));
             edit.setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_E);
             
@@ -175,7 +175,7 @@ public class ChannelList extends ListActivity
     		
     		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
     		
-    		menu.setDefaultItem(EDIT_CHANNEL_ID);
+    		menu.setDefaultItem(INSERT_ID);
     	}
     	
     	return true;
