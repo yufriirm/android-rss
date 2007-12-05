@@ -153,21 +153,6 @@ public class RSSChannelList extends ListActivity
     	{
             ContentURI uri = getIntent().getData().addId(getSelectionRowID());
 
-            Menu.Item[] items = new Menu.Item[1];
-            
-            /* Also add any other actions that we don't even know about
-             * yet... */
-            Intent intent = new Intent(null, uri);
-            intent.addCategory(Intent.SELECTED_ALTERNATIVE_CATEGORY);
-            menu.addIntentOptions(Menu.SELECTED_ALTERNATIVE, 0, null, null,
-                                  intent, Menu.NO_SEPARATOR_AFTER, items);
-            
-            /* Give a shortcut to the edit action. */
-            if (items[0] != null)
-                items[0].setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_E);
-            else
-            	Log.d("RSSTest", "boo");
-
     		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
 
     		menu.add(Menu.SELECTED_ALTERNATIVE, REFRESH_ALL_ID, "Refresh All");
