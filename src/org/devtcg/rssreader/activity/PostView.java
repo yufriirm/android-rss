@@ -65,15 +65,17 @@ public class PostView extends Activity
 //		RSSChannelHead head = (RSSChannelHead)findViewById(R.id.postViewHead);
 //		PostScrollView scroll = (PostScrollView)findViewById(R.id.postViewScroll);
 //		scroll.setChannelHead(head);
+		
+		ContentURI uri = getIntent().getData();
 
-		mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null, null);
-		
-		if (mCursor.first() == false)
+		mCursor = managedQuery(uri, PROJECTION, null, null, null);
+
+		if (mCursor == null || mCursor.first() == false)
 			finish();
-		
+
 		mChannelID = mCursor.getLong(mCursor.getColumnIndex(RSSReader.Posts.CHANNEL_ID));
-		mPostID = new Long(getIntent().getData().getPathSegment(1));
-		
+		mPostID = new Long(uri.getPathSegment(1));
+
 		/* TODO: Should this be in onStart() or onResume() or something?  */
 		initWithData();
 	}
@@ -82,11 +84,9 @@ public class PostView extends Activity
 	protected void onStart()
 	{
 		super.onStart();
-		
-		if (mCursor == null)
+
+		if (mCursor == null || mCursor.first() == false)
 			return;
-		
-		mCursor.first();
 
 		/* Set the post to read. */
 		mCursor.updateInt(mCursor.getColumnIndex(RSSReader.Posts.READ), 1);
@@ -102,12 +102,12 @@ public class PostView extends Activity
 
 		assert(cChannel.count() == 1);
 		cChannel.first();
-		
+
 		/* Make the view useful. */
 		ChannelHead head = (ChannelHead)findViewById(R.id.postViewHead);
 		head.setLogo(cChannel);
 		head.setPost(mCursor);
-		
+
 		cChannel.close();
 
 		TextView postTitle = (TextView)findViewById(R.id.postTitle);
@@ -118,9 +118,9 @@ public class PostView extends Activity
 		/* TODO: I want the background transparent, but that doesn't seem 
 		 * possible.  Black will do for now. */
 		String html =
-			"<html><head><style type=\"text/css\">body { background-color: #201c19; color: white; } a { color: #ddf; }</style></head><body>" +
-			getBody() +
-			"</body></html>";
+		  "<html><head><style type=\"text/css\">body { background-color: #201c19; color: white; } a { color: #ddf; }</style></head><body>" +
+		  getBody() +
+		  "</body></html>";
 
 		postText.loadData(html, "text/html", "utf-8");
 	}
