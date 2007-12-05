@@ -123,10 +123,10 @@ public class RSSChannelListRow extends RelativeLayout
 			byte[] raw = iconData.getBytes();
 
 			mIcon.setImageBitmap
-			(BitmapFactory.decodeByteArray(raw, 0, raw.length));
+			  (BitmapFactory.decodeByteArray(raw, 0, raw.length));
 		}
 		else
-		{			
+		{
 			mIcon.setImageResource(R.drawable.feedicon);
 		}
 
