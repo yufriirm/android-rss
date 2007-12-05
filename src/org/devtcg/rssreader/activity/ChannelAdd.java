@@ -85,8 +85,12 @@ public class ChannelAdd extends Activity
 				{
 					try
 					{
-						final long id = (new ChannelRefresh(getContentResolver())).
-						  syncDB(null, -1, rssurl);
+						ChannelRefresh refresh = new ChannelRefresh(getContentResolver());
+						
+						final long id = refresh.syncDB(null, -1, rssurl);
+						
+						if (id >= 0)
+							refresh.updateFavicon(id, rssurl);
 						
 				    	mHandler.post(new Runnable() {
 				    		public void run()

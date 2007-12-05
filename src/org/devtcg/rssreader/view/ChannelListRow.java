@@ -16,6 +16,8 @@
 
 package org.devtcg.rssreader.view;
 
+import java.net.URISyntaxException;
+
 import org.devtcg.rssreader.R;
 import org.devtcg.rssreader.R.drawable;
 import org.devtcg.rssreader.provider.RSSReader;
@@ -25,6 +27,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.net.ContentURI;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.ImageView;
@@ -55,7 +58,7 @@ public class ChannelListRow extends RelativeLayout
 		mIcon.setId(CHANNEL_ICON);
 
 		RelativeLayout.LayoutParams iconRules =
-		  new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		  new RelativeLayout.LayoutParams(16 + 3, 16 + 4);
 		
 		iconRules.addRule(ALIGN_WITH_PARENT_LEFT);
 		addView(mIcon, iconRules);
@@ -117,19 +120,13 @@ public class ChannelListRow extends RelativeLayout
 		else
 			tf = Typeface.DEFAULT;
 
-		String iconData =
+		String icon = 
 		  cursor.getString(cursor.getColumnIndex(RSSReader.Channels.ICON));
-
-		if (iconData != null)
-		{
-			byte[] raw = iconData.getBytes();
-
-			mIcon.setImageBitmap
-			  (BitmapFactory.decodeByteArray(raw, 0, raw.length));
-		}
-		else
-		{
-			mIcon.setImageResource(R.drawable.feedicon);
+		
+		try {
+			mIcon.setImageURI(new ContentURI(icon));
+		} catch (URISyntaxException e) {
+			Log.d("ChannelListRow", "Invalid URI?  Lies (" + icon + ")!");
 		}
 
 		mName.setTypeface(tf);
