@@ -24,6 +24,7 @@ package org.devtcg.rssreader.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -153,8 +154,55 @@ public class ChannelRefresh extends DefaultHandler
 
 		URL url = new URL(mRSSURL);
 		xr.parse(new InputSource(url.openStream()));
-		
+
 		return mID;
+	}
+
+	public boolean updateFavicon(long id, String rssurl)
+	{
+		InputStream stream = null;
+		OutputStream ico = null;
+		
+		boolean r = false;
+		
+		try
+		{
+			URL orig = new URL(rssurl);
+
+			URL iconUrl = new URL(orig.getProtocol(), orig.getHost(),
+			  orig.getPort(), "/favicon.ico");
+
+			stream = iconUrl.openStream();
+			
+			ico =
+			  mContent.openOutputStream(RSSReader.Channels.CONTENT_URI.addId(id).addPath("icon"));
+			
+			byte[] b = new byte[1024];
+
+			int n;
+			while ((n = stream.read(b)) != -1)
+				ico.write(b, 0, n);
+			
+			r = true;
+		}
+		catch (Exception e)
+		{
+			Log.d(TAG, Log.getStackTraceString(e));
+		}
+		finally
+		{
+			try
+			{
+				if (stream != null)
+					stream.close();
+
+				if (ico != null)
+					ico.close();
+			}
+			catch (IOException e) { }
+		}
+		
+		return r;
 	}
 
 	public void startElement(String uri, String name, String qName,
