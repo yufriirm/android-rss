@@ -14,7 +14,6 @@
  * General Public License for more details.
  */
 
-
 package org.devtcg.rssreader.provider;
 
 import android.net.ContentURI;
@@ -24,7 +23,7 @@ public final class RSSReader
 {
 	public static final String AUTHORITY = "org.devtcg.rssreader.provider.RSSReader";
 	
-	public static final class Channels implements BaseColumns
+	public interface Channels extends BaseColumns
 	{
 		/* URI for accessing a specific channel.  See Posts.CONTENT_URI_LIST
 		 * for how to "view" the channel posts. */
@@ -45,8 +44,8 @@ public final class RSSReader
 		/* Site's formal logo; derived from the XML feed. */
 		public static final String LOGO = "logo";
 	}
-	
-	public static final class Posts implements BaseColumns
+
+	public interface Posts extends BaseColumns
 	{
 		/* URI for accessing a specific post. */
 		public static final ContentURI CONTENT_URI = 
