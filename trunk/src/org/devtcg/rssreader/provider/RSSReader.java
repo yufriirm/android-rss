@@ -15,19 +15,21 @@
  */
 
 
-package org.devtcg.rssprovider;
+package org.devtcg.rssreader.provider;
 
 import android.net.ContentURI;
 import android.provider.BaseColumns;
 
 public final class RSSReader
 {
+	public static final String AUTHORITY = "org.devtcg.rssreader.provider.RSSReader";
+	
 	public static final class Channels implements BaseColumns
 	{
 		/* URI for accessing a specific channel.  See Posts.CONTENT_URI_LIST
 		 * for how to "view" the channel posts. */
 		public static final ContentURI CONTENT_URI = 
-			ContentURI.create("content://org.devtcg.rssprovider.RSSReader/channels");
+		  ContentURI.create("content://" + AUTHORITY + "/channels");
 		
 		public static final String DEFAULT_SORT_ORDER = "title ASC";
 		
@@ -48,11 +50,11 @@ public final class RSSReader
 	{
 		/* URI for accessing a specific post. */
 		public static final ContentURI CONTENT_URI = 
-			ContentURI.create("content://org.devtcg.rssprovider.RSSReader/posts");
+		  ContentURI.create("content://" + AUTHORITY + "/posts");
 		
 		/* URI for accessing a list of posts on a particular channel. */
 		public static final ContentURI CONTENT_URI_LIST =
-			ContentURI.create("content://org.devtcg.rssprovider.RSSReader/postlist");
+		  ContentURI.create("content://" + AUTHORITY + "/postlist");
 		
 		public static final String DEFAULT_SORT_ORDER = "posted_on DESC";
 		

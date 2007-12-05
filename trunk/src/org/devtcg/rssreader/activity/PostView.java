@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSPostView.java 59 2007-12-02 03:41:15Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,11 +14,15 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.activity;
 
 import java.util.Map;
 
-import org.devtcg.rssprovider.RSSReader;
+import org.devtcg.rssreader.R;
+import org.devtcg.rssreader.R.id;
+import org.devtcg.rssreader.R.layout;
+import org.devtcg.rssreader.provider.RSSReader;
+import org.devtcg.rssreader.view.ChannelHead;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -34,7 +38,7 @@ import android.webkit.WebView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-public class RSSPostView extends Activity
+public class PostView extends Activity
 {
 	private final static int NEXT_POST_ID = Menu.FIRST;
 	private final static int PREV_POST_ID = Menu.FIRST + 1;
@@ -100,7 +104,7 @@ public class RSSPostView extends Activity
 		cChannel.first();
 		
 		/* Make the view useful. */
-		RSSChannelHead head = (RSSChannelHead)findViewById(R.id.postViewHead);
+		ChannelHead head = (ChannelHead)findViewById(R.id.postViewHead);
 		head.setLogo(cChannel);
 		head.setPost(mCursor);
 		
@@ -267,7 +271,7 @@ public class RSSPostView extends Activity
     public static class PostScrollView extends ScrollView
     {
     	private int mTitleTop = 0;
-    	private RSSChannelHead mHead;
+    	private ChannelHead mHead;
     	
     	public PostScrollView(Context context)
     	{
@@ -284,7 +288,7 @@ public class RSSPostView extends Activity
     		super(context, attrs, inflateParams, defStyle);
     	}
     	
-    	public void setChannelHead(RSSChannelHead head)
+    	public void setChannelHead(ChannelHead head)
     	{
     		mHead = head;
     	}

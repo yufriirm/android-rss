@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSChannelRefresh.java 59 2007-12-02 03:41:15Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -20,7 +20,7 @@
  * Date parser code lifted from Informa <http://informa.sourceforge.net>.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +36,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.devtcg.rssprovider.RSSReader;
+import org.devtcg.rssreader.provider.RSSReader;
 import org.xml.sax.XMLReader;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -50,7 +50,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-public class RSSChannelRefresh extends DefaultHandler
+public class ChannelRefresh extends DefaultHandler
 {
 	private static final String TAG = "RSSChannelRefresh";
 
@@ -121,7 +121,7 @@ public class RSSChannelRefresh extends DefaultHandler
 	    }
 	}
 
-	public RSSChannelRefresh(ContentResolver resolver)
+	public ChannelRefresh(ContentResolver resolver)
 	{
 		super();
 		mContent = resolver;

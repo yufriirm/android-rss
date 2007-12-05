@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSChannelAdd.java 59 2007-12-02 03:41:15Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,9 +14,13 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.activity;
 
-import org.devtcg.rssprovider.RSSReader;
+import org.devtcg.rssreader.R;
+import org.devtcg.rssreader.R.id;
+import org.devtcg.rssreader.R.layout;
+import org.devtcg.rssreader.parser.ChannelRefresh;
+import org.devtcg.rssreader.provider.RSSReader;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -29,7 +33,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class RSSChannelAdd extends Activity
+public class ChannelAdd extends Activity
 {
 	public EditText mURLText;
 
@@ -72,7 +76,7 @@ public class RSSChannelAdd extends Activity
 		{
 			final String rssurl = mURLText.getText().toString();
 
-			mBusy = ProgressDialog.show(RSSChannelAdd.this,
+			mBusy = ProgressDialog.show(ChannelAdd.this,
 			  "Downloading", "Accessing XML feed...", true, false);
 
 			Thread t = new Thread()
@@ -81,7 +85,7 @@ public class RSSChannelAdd extends Activity
 				{
 					try
 					{
-						final long id = (new RSSChannelRefresh(getContentResolver())).
+						final long id = (new ChannelRefresh(getContentResolver())).
 						  syncDB(null, -1, rssurl);
 						
 				    	mHandler.post(new Runnable() {
@@ -107,7 +111,7 @@ public class RSSChannelAdd extends Activity
 
 			    				String errstr = ((errmsgFull != null) ? errmsgFull : errmsg);
 
-			    				AlertDialog.show(RSSChannelAdd.this,
+			    				AlertDialog.show(ChannelAdd.this,
 			    				  "Feed error", "An error was encountered while accessing the feed: " + errstr,
 			    				  "OK", true);
 			    			}

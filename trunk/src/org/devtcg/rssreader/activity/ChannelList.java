@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSChannelList.java 63 2007-12-05 00:09:30Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,11 +14,15 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.activity;
 
 import java.util.HashMap;
 
-import org.devtcg.rssprovider.RSSReader;
+import org.devtcg.rssreader.R;
+import org.devtcg.rssreader.R.layout;
+import org.devtcg.rssreader.parser.ChannelRefresh;
+import org.devtcg.rssreader.provider.RSSReader;
+import org.devtcg.rssreader.view.ChannelListRow;
 
 import android.app.ListActivity;
 import android.content.Context;
@@ -38,7 +42,7 @@ import android.widget.Filterable;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-public class RSSChannelList extends ListActivity
+public class ChannelList extends ListActivity
 {
 	public static final String TAG = "RSSChannelList";
 	public static final String TAG_PREFS = "RSSReader";
@@ -72,7 +76,7 @@ public class RSSChannelList extends ListActivity
         Intent intent = getIntent();
         if (intent.getData() == null)
             intent.setData(RSSReader.Channels.CONTENT_URI);
-
+        
         if (intent.getAction() == null)
         	intent.setAction(Intent.VIEW_ACTION);
 
@@ -275,7 +279,7 @@ public class RSSChannelList extends ListActivity
 
     	/* TODO: Is there a generalization of getListView().getSelectedView() we can use here?
     	 * http://groups.google.com/group/android-developers/browse_thread/thread/4070126fd996001c */
-    	RSSChannelListRow row =
+    	ChannelListRow row =
     	  ((RSSChannelListAdapter)getListAdapter()).getViewByRowID(channelId);
     	
     	assert(row != null);
@@ -297,15 +301,15 @@ public class RSSChannelList extends ListActivity
     	/* TODO: Android should provide a way to look up a View by row, but
     	 * it does not currently.  Hopefully this will be fixed in future
     	 * releases. */
-    	private HashMap<Long, RSSChannelListRow> rowMap;
+    	private HashMap<Long, ChannelListRow> rowMap;
 
 		public RSSChannelListAdapter(Cursor c, Context context)
 		{
 			super(c, context);
-			rowMap = new HashMap<Long, RSSChannelListRow>();
+			rowMap = new HashMap<Long, ChannelListRow>();
 		}
 
-		protected void updateRowMap(Cursor cursor, RSSChannelListRow row)
+		protected void updateRowMap(Cursor cursor, ChannelListRow row)
 		{
 			Long channelId =
 			  new Long(cursor.getLong(cursor.getColumnIndex(RSSReader.Channels._ID)));
@@ -316,7 +320,7 @@ public class RSSChannelList extends ListActivity
 		@Override
 		public void bindView(View view, Context context, Cursor cursor)
 		{
-			RSSChannelListRow row = (RSSChannelListRow)view;
+			ChannelListRow row = (ChannelListRow)view;
 			row.bindView(cursor);
 			updateRowMap(cursor, row);
 		}
@@ -324,13 +328,13 @@ public class RSSChannelList extends ListActivity
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent)
 		{
-			RSSChannelListRow row = new RSSChannelListRow(context);
+			ChannelListRow row = new ChannelListRow(context);
 			row.bindView(cursor);
 			updateRowMap(cursor, row);
 			return row;
 		}
 		
-		public RSSChannelListRow getViewByRowID(long id)
+		public ChannelListRow getViewByRowID(long id)
 		{
 			return rowMap.get(new Long(id));
 		}
@@ -339,11 +343,11 @@ public class RSSChannelList extends ListActivity
     private class RefreshRunnable implements Runnable
     {
     	private Handler mHandler;
-    	private RSSChannelListRow mRow;
+    	private ChannelListRow mRow;
     	private long mChannelID;
     	private String mRSSURL;
 
-    	public RefreshRunnable(Handler handler, RSSChannelListRow row, long channelId, String rssurl)
+    	public RefreshRunnable(Handler handler, ChannelListRow row, long channelId, String rssurl)
     	{
     		mHandler = handler;
     		mRow = row;
@@ -364,7 +368,7 @@ public class RSSChannelList extends ListActivity
 
 			try
 			{
-				new RSSChannelRefresh(getContentResolver()).
+				new ChannelRefresh(getContentResolver()).
 				  syncDB(mHandler, mChannelID, mRSSURL);
 			}
 			catch (Exception e)

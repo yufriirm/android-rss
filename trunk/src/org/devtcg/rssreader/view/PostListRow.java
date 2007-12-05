@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSPostListRow.java 60 2007-12-04 02:21:11Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,13 +14,13 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.view;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.devtcg.rssprovider.RSSReader;
+import org.devtcg.rssreader.provider.RSSReader;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -33,7 +33,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class RSSPostListRow extends ViewGroup
+public class PostListRow extends ViewGroup
 {
 	private static final int SUBJECT_ID = 1;
 	private static final int DATE_ID = 2;
@@ -57,7 +57,7 @@ public class RSSPostListRow extends ViewGroup
 		mDateFmt = new SimpleDateFormat("MM/dd/yyyy h:mma");
 	}
 
-	public RSSPostListRow(Context context)
+	public PostListRow(Context context)
 	{
 		super(context);
 

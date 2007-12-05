@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSReaderService_Alarm.java 59 2007-12-02 03:41:15Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,17 +14,18 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.service;
+
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentReceiver;
 
-public class RSSReaderService_Alarm extends IntentReceiver
+public class ReaderService_Alarm extends IntentReceiver
 {
 	@Override
 	public void onReceiveIntent(Context context, Intent intent)
 	{
-		context.startService(new Intent(context, RSSReaderService.class), null);
+		context.startService(new Intent(context, ReaderService.class), null);
 	}
 }

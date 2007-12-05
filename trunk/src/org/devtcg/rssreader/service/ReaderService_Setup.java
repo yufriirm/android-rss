@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSReaderService_Setup.java 59 2007-12-02 03:41:15Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,7 +14,8 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.service;
+
 
 import android.app.AlarmManager;
 import android.content.Context;
@@ -23,7 +24,7 @@ import android.content.IntentReceiver;
 import android.os.SystemClock;
 import android.util.Log;
 
-public class RSSReaderService_Setup extends IntentReceiver
+public class ReaderService_Setup extends IntentReceiver
 {
 	public static final String TAG = "RSSReaderService_Setup";
 
@@ -39,7 +40,7 @@ public class RSSReaderService_Setup extends IntentReceiver
 		Log.d(TAG, "setupAlarm");
 		
 		/* Start our service via the IntentFilter dummy class. */
-		Intent start = new Intent(context, RSSReaderService_Alarm.class);
+		Intent start = new Intent(context, ReaderService_Alarm.class);
 		
 		/* Every hour. */
 		long interval = 50 * 1000;

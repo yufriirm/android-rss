@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: RSSPostList.java 59 2007-12-02 03:41:15Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -14,9 +14,14 @@
  * General Public License for more details.
  */
 
-package org.devtcg.rssreader;
+package org.devtcg.rssreader.activity;
 
-import org.devtcg.rssprovider.RSSReader;
+import org.devtcg.rssreader.R;
+import org.devtcg.rssreader.R.id;
+import org.devtcg.rssreader.R.layout;
+import org.devtcg.rssreader.provider.RSSReader;
+import org.devtcg.rssreader.view.ChannelHead;
+import org.devtcg.rssreader.view.PostListRow;
 
 import android.app.ListActivity;
 import android.content.ContentResolver;
@@ -32,7 +37,7 @@ import android.widget.Filterable;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-public class RSSPostList extends ListActivity
+public class PostList extends ListActivity
 {
 	private static final String[] PROJECTION = new String[] {
 	  RSSReader.Posts._ID, RSSReader.Posts.CHANNEL_ID,
@@ -69,7 +74,7 @@ public class RSSPostList extends ListActivity
 		cChannel.first();
 
 		/* TODO: Check if RSSReader.Channels.LOGO exists and use it. */
-		RSSChannelHead head = (RSSChannelHead)findViewById(R.id.postListHead);
+		ChannelHead head = (ChannelHead)findViewById(R.id.postListHead);
 		head.setLogo(cChannel);
 		
 		cChannel.close();
@@ -102,13 +107,13 @@ public class RSSPostList extends ListActivity
 		@Override
 		public void bindView(View view, Context context, Cursor cursor)
 		{
-			((RSSPostListRow)view).bindView(cursor);
+			((PostListRow)view).bindView(cursor);
 		}
 
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent)
 		{
-			RSSPostListRow post = new RSSPostListRow(context);
+			PostListRow post = new PostListRow(context);
 			post.bindView(cursor);
 			return post;
 		}
