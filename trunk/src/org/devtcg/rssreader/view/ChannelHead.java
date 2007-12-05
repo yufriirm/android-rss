@@ -16,6 +16,7 @@
 
 package org.devtcg.rssreader.view;
 
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.devtcg.rssreader.R;
@@ -30,6 +31,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.net.ContentURI;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -103,7 +105,7 @@ public class ChannelHead extends LinearLayout
 			mIcon.setPadding(10, paddingTop, 0, paddingBottom);
 			
 			LayoutParams iconRules =
-			  new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			  new LayoutParams(16 + 10, 16 + paddingTop + paddingBottom);
 			
 			iconRules.gravity = Gravity.CENTER_VERTICAL;
 			
@@ -112,14 +114,9 @@ public class ChannelHead extends LinearLayout
 		
 		if (iconData != null)
 		{
-			byte[] raw = iconData.getBytes();
-
-			mIcon.setImageBitmap
-			  (BitmapFactory.decodeByteArray(raw, 0, raw.length));
-		}
-		else
-		{
-			mIcon.setImageResource(R.drawable.feedicon);
+			try {
+				mIcon.setImageURI(new ContentURI(iconData));
+			} catch (URISyntaxException e) { }
 		}
 		
 		if (mLogoText == null)

@@ -38,12 +38,40 @@
 		android:layout_height="wrap_content"
 		android:text="Feed name:"
 		/>
-		
+
 	<EditText id="@+id/channelEditName"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:singleLine="true"
 		/>
+
+<!--
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Feed icon:"
+		/>
+
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+
+		<ImageView id="@+id/channelEditIcon"
+			android:layout_width="wrap_content"
+			android:layout_height="fill_parent"
+			android:gravity="center_vertical"
+			android:padding="3dip"
+			/>
+
+		<Button id="@+id/channelEditIconDownload"
+			android:layout_width="wrap_content"
+			android:layout_height="fill_parent"
+			android:text="Refresh"
+			/>
+		
+	</LinearLayout>
+  -->
 
 <!--		
 	<CheckBox id="@+id/download_name"
