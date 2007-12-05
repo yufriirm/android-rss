@@ -116,7 +116,7 @@ public class RSSChannelHead extends LinearLayout
 			  (BitmapFactory.decodeByteArray(raw, 0, raw.length));
 		}
 		else
-		{			
+		{
 			mIcon.setImageResource(R.drawable.feedicon);
 		}
 		
