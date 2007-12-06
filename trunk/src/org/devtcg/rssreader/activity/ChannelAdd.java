@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: ChannelAdd.java 78 2007-12-06 01:02:59Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -26,6 +26,7 @@ import android.app.ProgressDialog;
 import android.net.ContentURI;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -39,17 +40,35 @@ public class ChannelAdd extends Activity
 	 * and for name downloads. */
 	protected ProgressDialog mBusy;	
 	final Handler mHandler = new Handler();
-
+	
 	@Override
 	protected void onCreate(Bundle icicle)
 	{
 		super.onCreate(icicle);
 		setContentView(R.layout.channel_add);
-		
+
 		mURLText = (EditText)findViewById(R.id.url);
+//		mURLText.setKeyListener(new View.OnKeyListener() {
+//			public boolean onKey(View v, int keyCode, KeyEvent event)
+//			{
+//				if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+//				    keyCode == KeyEvent.KEYCODE_NEWLINE)
+//				{
+//					addChannel();
+//					return true;
+//				}
+//
+//				return false;
+//			}
+//		});
 		
 		Button add = (Button)findViewById(R.id.add);
-		add.setOnClickListener(mAddListener);
+		add.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v)
+			{
+				addChannel();
+			}
+		});
 	}
 
 	@Override
@@ -67,62 +86,59 @@ public class ChannelAdd extends Activity
 		
 		mURLText.restoreState(state);
 	}
-
-	private OnClickListener mAddListener = new OnClickListener()
+	
+	private void addChannel()
 	{
-		public void onClick(View v)
+		final String rssurl = mURLText.getText().toString();
+
+		mBusy = ProgressDialog.show(ChannelAdd.this,
+		  "Downloading", "Accessing XML feed...", true, false);
+
+		Thread t = new Thread()
 		{
-			final String rssurl = mURLText.getText().toString();
-
-			mBusy = ProgressDialog.show(ChannelAdd.this,
-			  "Downloading", "Accessing XML feed...", true, false);
-
-			Thread t = new Thread()
+			public void run()
 			{
-				public void run()
+				try
 				{
-					try
-					{
-						ChannelRefresh refresh = new ChannelRefresh(getContentResolver());
-						
-						final long id = refresh.syncDB(null, -1, rssurl);
-						
-						if (id >= 0)
-							refresh.updateFavicon(id, rssurl);
-						
-				    	mHandler.post(new Runnable() {
-				    		public void run()
-				    		{
-				    			mBusy.dismiss();
+					ChannelRefresh refresh = new ChannelRefresh(getContentResolver());
 
-				    			ContentURI uri = RSSReader.Channels.CONTENT_URI.addId(id);
-				    			setResult(RESULT_OK, uri.toString());
-				    			finish();
-				    		}
-				    	});
-					}
-					catch(Exception e)
-					{
-						final String errmsg = e.getMessage();
-						final String errmsgFull = e.toString();
+					final long id = refresh.syncDB(null, -1, rssurl);
 
-			    		mHandler.post(new Runnable() {
-			    			public void run()
-			    			{
-			    				mBusy.dismiss();
+					if (id >= 0)
+						refresh.updateFavicon(id, rssurl, true);
 
-			    				String errstr = ((errmsgFull != null) ? errmsgFull : errmsg);
-
-			    				AlertDialog.show(ChannelAdd.this,
-			    				  "Feed error", "An error was encountered while accessing the feed: " + errstr,
-			    				  "OK", true);
-			    			}
-			    		});
-					}			    	
+			    	mHandler.post(new Runnable() {
+			    		public void run()
+			    		{
+			    			mBusy.dismiss();
+			    			
+			    			ContentURI uri = RSSReader.Channels.CONTENT_URI.addId(id);
+			    			setResult(RESULT_OK, uri.toString());
+			    			finish();
+			    		}
+			    	});
 				}
-			};
+				catch(Exception e)
+				{
+					final String errmsg = e.getMessage();
+					final String errmsgFull = e.toString();
 
-			t.start();
-		}
-	};
+		    		mHandler.post(new Runnable() {
+		    			public void run()
+		    			{
+		    				mBusy.dismiss();
+
+		    				String errstr = ((errmsgFull != null) ? errmsgFull : errmsg);
+
+		    				AlertDialog.show(ChannelAdd.this,
+		    				  "Feed error", "An error was encountered while accessing the feed: " + errstr,
+		    				  "OK", true);
+		    			}
+		    		});
+				}			    	
+			}
+		};
+
+		t.start();		
+	}
 }
