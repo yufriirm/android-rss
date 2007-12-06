@@ -155,24 +155,35 @@ public class ChannelRefresh extends DefaultHandler
 		return mID;
 	}
 
-	public boolean updateFavicon(long id, String rssurl)
+	public boolean updateFavicon(long id, String rssurl, boolean newChannel)
 	{
 		InputStream stream = null;
 		OutputStream ico = null;
-		
+
 		boolean r = false;
+
+		ContentURI feedUri = RSSReader.Channels.CONTENT_URI.addId(id);
+		ContentURI iconUri = feedUri.addPath("icon");
 		
 		try
 		{
 			URL orig = new URL(rssurl);
+
+			/* TODO */
+//			if (newChannel == true)
+//			{
+//				ContentValues values = new ContentValues();
+//				
+//				values.put(RSSReader.Channels.ICON, iconUri.toString());
+//				mContent.update(feedUri, values, null, null);
+//			}
 
 			URL iconUrl = new URL(orig.getProtocol(), orig.getHost(),
 			  orig.getPort(), "/favicon.ico");
 
 			stream = iconUrl.openStream();
 			
-			ico =
-			  mContent.openOutputStream(RSSReader.Channels.CONTENT_URI.addId(id).addPath("icon"));
+			ico = mContent.openOutputStream(iconUri);
 			
 			byte[] b = new byte[1024];
 
