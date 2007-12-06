@@ -145,29 +145,27 @@ public class PostView extends Activity
 	private boolean hasMoreLink(String body, String url)
 	{
 		int urlpos;
-		
+
 		/* Check if the body contains an anchor reference with the
 		 * destination of the read more URL we got from the feed. */
-		if ((urlpos = body.indexOf(url)) > 0)
-		{
-			try
-			{
-				/* TODO: Improve this check with a full look-behind parse. */
-				if (body.charAt(urlpos - 1) != '>')
-					return false;
-			
-				if (body.charAt(urlpos + url.length() + 1) != '<')
-					return false;
-			}
-			catch (IndexOutOfBoundsException e)
-			{
-				return false;
-			}
-			
-			return true;
-		}
+		if ((urlpos = body.indexOf(url)) <= 0)
+			return false;
 		
-		return false;
+		try
+		{
+			/* TODO: Improve this check with a full look-behind parse. */
+			if (body.charAt(urlpos - 1) != '>')
+				return false;
+
+			if (body.charAt(urlpos + url.length() + 1) != '<')
+				return false;
+		}
+		catch (IndexOutOfBoundsException e)
+		{
+			return false;
+		}
+			
+		return true;
 	}
 
 	@Override
@@ -217,13 +215,13 @@ public class PostView extends Activity
 		if (mNextPostID >= 0)
 		{
 			menu.add(0, NEXT_POST_ID, "Newer Post").
-  	  	  	  setShortcut(KeyEvent.KEYCODE_3, 0, KeyEvent.KEYCODE_LEFT_BRACKET);
+  	  	  	  setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_LEFT_BRACKET);
 		}
     	
 		if (mPrevPostID >= 0)
 		{
 			menu.add(0, PREV_POST_ID, "Older Post").
-			  setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_RIGHT_BRACKET);
+			  setShortcut(KeyEvent.KEYCODE_3, 0, KeyEvent.KEYCODE_RIGHT_BRACKET);
 			
 			menu.setDefaultItem(PREV_POST_ID);
 		}
