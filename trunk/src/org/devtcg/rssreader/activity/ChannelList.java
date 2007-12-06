@@ -19,7 +19,6 @@ package org.devtcg.rssreader.activity;
 import java.util.HashMap;
 
 import org.devtcg.rssreader.R;
-import org.devtcg.rssreader.R.layout;
 import org.devtcg.rssreader.parser.ChannelRefresh;
 import org.devtcg.rssreader.provider.RSSReader;
 import org.devtcg.rssreader.view.ChannelListRow;

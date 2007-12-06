@@ -19,8 +19,6 @@ package org.devtcg.rssreader.activity;
 import java.util.Map;
 
 import org.devtcg.rssreader.R;
-import org.devtcg.rssreader.R.id;
-import org.devtcg.rssreader.R.layout;
 import org.devtcg.rssreader.provider.RSSReader;
 import org.devtcg.rssreader.view.ChannelHead;
 

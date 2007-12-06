@@ -18,14 +18,11 @@ package org.devtcg.rssreader.view;
 
 import java.net.URISyntaxException;
 
-import org.devtcg.rssreader.R;
-import org.devtcg.rssreader.R.drawable;
 import org.devtcg.rssreader.provider.RSSReader;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.net.ContentURI;
 import android.util.Log;

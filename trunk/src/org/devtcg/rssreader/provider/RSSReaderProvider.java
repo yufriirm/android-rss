@@ -17,6 +17,16 @@
 package org.devtcg.rssreader.provider;
 
 
+import org.devtcg.rssreader.provider.RSSReaderProvider;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.devtcg.rssreader.R;
+
 import android.content.ContentProvider;
 import android.content.ContentProviderDatabaseHelper;
 import android.content.ContentURIParser;
@@ -31,16 +41,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.ContentURI;
 import android.text.TextUtils;
 import android.util.Log;
-
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.devtcg.rssreader.R;
 
 public class RSSReaderProvider extends ContentProvider
 {
