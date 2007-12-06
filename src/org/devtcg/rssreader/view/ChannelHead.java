@@ -19,21 +19,16 @@ package org.devtcg.rssreader.view;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import org.devtcg.rssreader.R;
-import org.devtcg.rssreader.R.drawable;
 import org.devtcg.rssreader.provider.RSSReader;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.net.ContentURI;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.LinearLayout;

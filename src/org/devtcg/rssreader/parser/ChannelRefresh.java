@@ -35,12 +35,10 @@ import java.util.TimeZone;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.devtcg.rssreader.provider.RSSReader;
-import org.xml.sax.XMLReader;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 import android.content.ContentResolver;
@@ -48,7 +46,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.ContentURI;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 
 public class ChannelRefresh extends DefaultHandler
