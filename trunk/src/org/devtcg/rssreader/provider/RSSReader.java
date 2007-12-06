@@ -44,7 +44,7 @@ public final class RSSReader
 		/* Site's formal logo; derived from the XML feed. */
 		public static final String LOGO = "logo";
 	}
-
+	
 	public interface Posts extends BaseColumns
 	{
 		/* URI for accessing a specific post. */

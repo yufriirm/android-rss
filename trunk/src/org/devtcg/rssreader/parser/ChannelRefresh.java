@@ -1,5 +1,5 @@
 /*
- * $Id: RSSChannelRefresh.java 59 2007-12-02 03:41:15Z jasta00 $
+ * $Id$
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
