@@ -1,5 +1,5 @@
 /*
- * $Id: RSSPostListRow.java 60 2007-12-04 02:21:11Z jasta00 $
+ * $Id$
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *

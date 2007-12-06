@@ -1,5 +1,5 @@
 /*
- * $Id: RSSChannelList.java 63 2007-12-05 00:09:30Z jasta00 $
+ * $Id$
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
