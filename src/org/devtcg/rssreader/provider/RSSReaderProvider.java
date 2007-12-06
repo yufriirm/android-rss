@@ -264,7 +264,7 @@ public class RSSReaderProvider extends ContentProvider
 			try {
 				if (ico != null)
 					ico.close();
-				
+
 				if (def != null)
 					def.close();
 			}
