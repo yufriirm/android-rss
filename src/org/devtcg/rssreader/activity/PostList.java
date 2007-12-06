@@ -28,6 +28,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.ContentURI;
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
@@ -37,12 +39,19 @@ import android.widget.ListView;
 
 public class PostList extends ListActivity
 {
+	private static final int PREV_ID = Menu.FIRST;
+	private static final int NEXT_ID = Menu.FIRST + 1;
+	
 	private static final String[] PROJECTION = new String[] {
 	  RSSReader.Posts._ID, RSSReader.Posts.CHANNEL_ID,
 	  RSSReader.Posts.TITLE, RSSReader.Posts.READ,
 	  RSSReader.Posts.DATE };
 	
 	private Cursor mCursor;
+	private long mID = -1;
+	
+	private long mPrevID = -1;
+	private long mNextID = -1;
 
 	@Override
 	protected void onCreate(Bundle icicle)
@@ -51,7 +60,9 @@ public class PostList extends ListActivity
 		
 		setContentView(R.layout.post_list);
 
-		mCursor = managedQuery(getIntent().getData(), PROJECTION, null, null);
+		ContentURI uri = getIntent().getData();
+		mCursor = managedQuery(uri, PROJECTION, null, null);
+		mID = new Long(uri.getPathSegment(1));
 
 		ListAdapter adapter = new RSSPostListAdapter(mCursor, this);
         setListAdapter(adapter);
@@ -92,6 +103,138 @@ public class PostList extends ListActivity
     	{
     		startActivity(new Intent(Intent.VIEW_ACTION, uri));
     	}
+    }
+    
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+    	menu.removeGroup(0);
+
+    	getSiblings();
+    	
+		if (mPrevID >= 0)
+		{
+			menu.add(0, PREV_ID, "Previous Channel").
+  	  	  	  setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_LEFT_BRACKET);
+		}
+
+		if (mNextID >= 0)
+		{
+			menu.add(0, NEXT_ID, "Next Channel").
+			  setShortcut(KeyEvent.KEYCODE_3, 0, KeyEvent.KEYCODE_RIGHT_BRACKET);
+
+			menu.setDefaultItem(PREV_ID);
+		}
+		
+		return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(Menu.Item item)
+    {
+    	switch(item.getId())
+    	{
+    	case PREV_ID:
+    		return prevChannel();
+    		
+    	case NEXT_ID:
+    		return nextChannel();
+    	}
+    	
+    	return super.onOptionsItemSelected(item);
+    }
+    
+    private void getSiblings()
+    {
+    	if (mNextID >= 0 && mPrevID >= 0)
+    		return;
+    	
+    	Cursor cChannelList = getContentResolver().query
+    	  (RSSReader.Channels.CONTENT_URI,
+    	    new String[] { RSSReader.Channels._ID }, null, null, null);
+
+    	/* TODO: This is super lame; we need to use SQLite queries to
+    	 * determine posts either newer or older than the current one
+    	 * without. */
+    	cChannelList.first();
+
+    	long lastId = -1;
+
+    	for (cChannelList.first(); cChannelList.isLast() == false; cChannelList.next())
+    	{
+    		long thisId = cChannelList.getLong(0);
+
+    		if (thisId == mID)
+    			break;
+
+    		lastId = thisId;
+    	}
+
+    	if (mPrevID < 0)
+    		mPrevID = lastId;
+
+    	if (mNextID < 0)
+    	{
+    		if (cChannelList.isLast() == false)
+    		{
+    			cChannelList.next();
+    			mNextID = cChannelList.getLong(0);
+    		}
+    	}
+    }
+    
+    private void moveTo(long id)
+    {
+    	ContentURI uri = RSSReader.Posts.CONTENT_URI_LIST;
+		Intent intent = new Intent(Intent.VIEW_ACTION, uri.addId(id));
+		startActivity(intent);
+		
+		/* Assume that user would do not want to keep the [now read]
+		 * current post in the history stack. */
+		finish();    	
+    }
+    
+    private boolean prevChannel()
+    {
+    	if (mPrevID < 0)
+    		return false;
+    	
+    	moveTo(mPrevID);
+    	return true;
+    }
+    
+    private boolean nextChannel()
+    {
+    	if (mNextID < 0)
+    		return false;
+    	
+    	moveTo(mNextID);
+    	return true;
+    }
+    
+    @Override
+	public boolean onKeyUp(int keyCode, KeyEvent event)
+    {
+    	switch (keyCode)
+    	{
+    	case KeyEvent.KEYCODE_LEFT_BRACKET:
+    	case KeyEvent.KEYCODE_DPAD_LEFT:
+    	case KeyEvent.KEYCODE_1:
+    	case KeyEvent.KEYCODE_4:
+    	case KeyEvent.KEYCODE_7:
+    		getSiblings();
+    		return prevChannel();
+    		
+    	case KeyEvent.KEYCODE_RIGHT_BRACKET:
+    	case KeyEvent.KEYCODE_DPAD_RIGHT:
+    	case KeyEvent.KEYCODE_3:
+    	case KeyEvent.KEYCODE_6:
+    	case KeyEvent.KEYCODE_9:
+    		getSiblings();
+    		return nextChannel();
+    	}
+    	
+    	return false;
     }
 
     private static class RSSPostListAdapter extends CursorAdapter implements Filterable
