@@ -269,7 +269,7 @@ public class ChannelList extends ListActivity
     	
     	long channelId =
       	  mCursor.getInt(mCursor.getColumnIndex(RSSReader.Channels._ID));
-    	
+
     	/* Don't refresh the same channel more than once. */
     	if (mRefreshThreads.containsKey(channelId) == true)
     		return;
@@ -280,7 +280,7 @@ public class ChannelList extends ListActivity
     	 * http://groups.google.com/group/android-developers/browse_thread/thread/4070126fd996001c */
     	ChannelListRow row =
     	  ((RSSChannelListAdapter)getListAdapter()).getViewByRowID(channelId);
-    	
+
     	assert(row != null);
     	
 		Runnable refresh = new RefreshRunnable(mRefreshHandler, row, channelId, rssurl); 
