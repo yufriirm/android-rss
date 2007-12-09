@@ -1,3 +1,4 @@
-This project is designed to be loaded into Eclipse.  I apologize for this
-inconvenience and would soon like to include a build environment which also
-supports ant and perhaps GNU make.
+Simple RSS reader designed to help others (and myself) learn the Android
+platform.  Hopefully this project will evolve to become a functional utility
+for the final Android platform, but I wouldn't count on me to finish it to that
+point :)
