@@ -62,7 +62,7 @@ public class PostList extends ListActivity
 
 		ContentURI uri = getIntent().getData();
 		mCursor = managedQuery(uri, PROJECTION, null, null);
-		mID = new Long(uri.getPathSegment(1));
+		mID = Long.parseLong(uri.getPathSegment(1));
 
 		ListAdapter adapter = new RSSPostListAdapter(mCursor, this);
         setListAdapter(adapter);
@@ -72,7 +72,7 @@ public class PostList extends ListActivity
 
 	private void initWithData()
 	{
-		long channelId = new Long(getIntent().getData().getPathSegment(1));
+		long channelId = Long.parseLong(getIntent().getData().getPathSegment(1));
 
 		ContentResolver cr = getContentResolver();		
 		Cursor cChannel = cr.query(RSSReader.Channels.CONTENT_URI.addId(channelId),

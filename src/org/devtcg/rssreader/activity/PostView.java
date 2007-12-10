@@ -72,7 +72,7 @@ public class PostView extends Activity
 			finish();
 
 		mChannelID = mCursor.getLong(mCursor.getColumnIndex(RSSReader.Posts.CHANNEL_ID));
-		mPostID = new Long(uri.getPathSegment(1));
+		mPostID = Long.parseLong(uri.getPathSegment(1));
 
 		/* TODO: Should this be in onStart() or onResume() or something?  */
 		initWithData();

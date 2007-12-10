@@ -238,7 +238,7 @@ public class ChannelList extends ListActivity
 
 		/* Delete related posts. */
 		getContentResolver().delete(RSSReader.Posts.CONTENT_URI,
-    	  "channel_id=?", new String[] { new Long(channelId).toString() });
+    	  "channel_id=?", new String[] { String.valueOf(channelId) });
 
 		mCursor.deleteRow();
     }
@@ -310,10 +310,10 @@ public class ChannelList extends ListActivity
 
 		protected void updateRowMap(Cursor cursor, ChannelListRow row)
 		{
-			Long channelId =
-			  new Long(cursor.getLong(cursor.getColumnIndex(RSSReader.Channels._ID)));
+			long channelId =
+			  cursor.getLong(cursor.getColumnIndex(RSSReader.Channels._ID));
 			
-			rowMap.put(channelId, row);
+			rowMap.put(new Long(channelId), row);
 		}
 		
 		@Override
