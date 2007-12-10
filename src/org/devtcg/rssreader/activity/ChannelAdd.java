@@ -16,6 +16,9 @@
 
 package org.devtcg.rssreader.activity;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.devtcg.rssreader.R;
 import org.devtcg.rssreader.parser.ChannelRefresh;
 import org.devtcg.rssreader.provider.RSSReader;
@@ -26,6 +29,7 @@ import android.app.ProgressDialog;
 import android.net.ContentURI;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,13 +38,15 @@ import android.widget.EditText;
 
 public class ChannelAdd extends Activity
 {
+	private static final String TAG = "ChannelAdd";
+
 	public EditText mURLText;
 
 	/* We need this to not block when accessing the RSS feed for validation
 	 * and for name downloads. */
 	protected ProgressDialog mBusy;	
 	final Handler mHandler = new Handler();
-	
+
 	@Override
 	protected void onCreate(Bundle icicle)
 	{
@@ -87,6 +93,25 @@ public class ChannelAdd extends Activity
 		mURLText.restoreState(state);
 	}
 	
+	private static URL getDefaultFavicon(String rssurl)
+	{
+		try
+		{
+			URL orig = new URL(rssurl);
+
+			URL iconUrl = new URL(orig.getProtocol(), orig.getHost(),
+			  orig.getPort(), "/favicon.ico");
+			
+			return iconUrl;
+		}
+		catch (MalformedURLException e)
+		{
+			/* This shouldn't happen since we've already validated. */
+			Log.d(TAG, Log.getStackTraceString(e));
+			return null;
+		}
+	}
+
 	private void addChannel()
 	{
 		final String rssurl = mURLText.getText().toString();
@@ -103,9 +128,12 @@ public class ChannelAdd extends Activity
 					ChannelRefresh refresh = new ChannelRefresh(getContentResolver());
 
 					final long id = refresh.syncDB(null, -1, rssurl);
-
+					
 					if (id >= 0)
-						refresh.updateFavicon(id, rssurl, true);
+					{
+						URL iconurl = getDefaultFavicon(rssurl);
+						refresh.updateFavicon(id, iconurl);
+					}
 
 			    	mHandler.post(new Runnable() {
 			    		public void run()
