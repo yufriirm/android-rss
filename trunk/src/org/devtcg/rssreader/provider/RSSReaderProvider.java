@@ -48,7 +48,7 @@ public class RSSReaderProvider extends ContentProvider
 	
 	private static final String TAG = "RSSReaderProvider";
 	private static final String DATABASE_NAME = "rss_reader.db";
-	private static final int DATABASE_VERSION = 7;
+	private static final int DATABASE_VERSION = 8;
 
 	private static HashMap<String, String> CHANNEL_LIST_PROJECTION_MAP;
 	private static HashMap<String, String> CHANNEL_ICON_PROJECTION_MAP;
@@ -69,7 +69,7 @@ public class RSSReaderProvider extends ContentProvider
 		{
 			db.execSQL("CREATE TABLE rssreader_channel (_id INTEGER PRIMARY KEY," +
 	           "	title TEXT UNIQUE, url TEXT UNIQUE, " +
-	           "    icon TEXT, logo TEXT);");
+	           "    icon TEXT, icon_url TEXT, logo TEXT);");
 		}
 
 		protected void onCreatePosts(SQLiteDatabase db)
@@ -100,20 +100,8 @@ public class RSSReaderProvider extends ContentProvider
 
 			switch(oldVersion)
 			{
-			/* This doesn't work, and I don't know why... */
-			case 4:
-				/* All we did was add a DEFAULT clause to the read field, 
-				 * but SQLite3 does not support column alteration. */
-				db.execSQL("UPDATE rssreader_post SET read = 0 WHERE (read IS NULL OR read != 1);");
-				db.execSQL("ALTER TABLE rssreader_post RENAME TO rssreader_post_tmp;");
-				onCreatePosts(db);
-				db.execSQL("INSERT INTO rssreader_post SELECT * FROM rssreader_post_tmp;");
-				db.execSQL("DROP TABLE rssreader_post_tmp;");
-				break;
-
-			case 5:
-				db.execSQL("ALTER TABLE rssreader_channel ADD COLUMN icon BLOB;");
-				db.execSQL("ALTER TABLE rssreader_channel ADD COLUMN logo BLOB;");
+			case 7:
+				db.execSQL("ALTER TABLE rssreader_channel ADD COLUMN icon_url TEXT;");
 				break;
 
 			default:
@@ -159,7 +147,7 @@ public class RSSReaderProvider extends ContentProvider
 		case CHANNELICON_ID:
 			ArrayList<ArrayList> list = new ArrayList<ArrayList>();
 			ArrayList<String> ofLists = new ArrayList<String>();
-			ofLists.add(getIconPath(new Long(url.getPathSegment(1))));
+			ofLists.add(getIconPath(Long.parseLong(url.getPathSegment(1))));
 			list.add(ofLists);
 			return new ArrayListCursor(new String[] { "_data" }, list);
 

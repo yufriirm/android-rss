@@ -40,6 +40,7 @@ public final class RSSReader
 		
 		/* Site's favicon; usually a guess. */
 		public static final String ICON = "icon";
+		public static final String ICON_URL = "icon_url";
 		
 		/* Site's formal logo; derived from the XML feed. */
 		public static final String LOGO = "logo";
