@@ -25,6 +25,7 @@ package org.devtcg.rssreader.parser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -154,8 +155,14 @@ public class ChannelRefresh extends DefaultHandler
 
 		return mID;
 	}
-
-	public boolean updateFavicon(long id, String rssurl, boolean newChannel)
+	
+	public boolean updateFavicon(long id, String iconUrl)
+	  throws MalformedURLException
+	{
+		return updateFavicon(id, new URL(iconUrl));
+	}
+	
+	public boolean updateFavicon(long id, URL iconUrl)
 	{
 		InputStream stream = null;
 		OutputStream ico = null;
@@ -164,25 +171,11 @@ public class ChannelRefresh extends DefaultHandler
 
 		ContentURI feedUri = RSSReader.Channels.CONTENT_URI.addId(id);
 		ContentURI iconUri = feedUri.addPath("icon");
-		
+
 		try
 		{
-			URL orig = new URL(rssurl);
-
-			/* TODO */
-//			if (newChannel == true)
-//			{
-//				ContentValues values = new ContentValues();
-//				
-//				values.put(RSSReader.Channels.ICON, iconUri.toString());
-//				mContent.update(feedUri, values, null, null);
-//			}
-
-			URL iconUrl = new URL(orig.getProtocol(), orig.getHost(),
-			  orig.getPort(), "/favicon.ico");
-
 			stream = iconUrl.openStream();
-			
+
 			ico = mContent.openOutputStream(iconUri);
 			
 			byte[] b = new byte[1024];
@@ -263,7 +256,7 @@ public class ChannelRefresh extends DefaultHandler
 				  new String[] { RSSReader.Posts._ID };
 
 				ContentURI listURI =
-				  RSSReader.Posts.CONTENT_URI_LIST.addId(new Long(mID).longValue());
+				  RSSReader.Posts.CONTENT_URI_LIST.addId(mID);
 
 				Cursor dup = mContent.query(listURI,
 					dupProj, "title = ? AND url = ?",
@@ -301,7 +294,7 @@ public class ChannelRefresh extends DefaultHandler
 			ContentURI added =
 			  mContent.insert(RSSReader.Channels.CONTENT_URI, values);
 			
-			mID = new Long(added.getPathSegment(1));
+			mID = Long.parseLong(added.getPathSegment(1));
 			
 			/* There's no reason we need to do this ever, but we'll just be
 			 * good about removing this awful hack from runtime data. */
