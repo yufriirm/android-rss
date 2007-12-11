@@ -42,8 +42,28 @@
         <mkdir dir="${outdir-classes}" />
     </target>
 
+    <target name="fix-perms">
+        <fileset dir="${outdir-r}" id="android-tools.R.files">
+            <include name="**/R.java" />
+        </fileset>
+
+        <fileset dir="${srcdir}" id="android-tools.aidl.files">
+            <include name="**/*.aidl" />
+        </fileset>
+
+        <chmod perm="u+w">
+            <fileset refid="android-tools.R.files" />
+            <fileset refid="android-tools.aidl.files" />
+        </chmod>
+
+        <attrib readonly="false">
+            <fileset refid="android-tools.R.files" />
+            <fileset refid="android-tools.aidl.files" />
+        </attrib>
+    </target>
+
     <!-- Generate the R.java file for this project's resources. -->
-    <target name="resource-src" depends="dirs">
+    <target name="resource-src" depends="dirs, fix-perms">
         <echo>Generating R.java...</echo>
         <exec executable="${aapt}" failonerror="true">
             <arg value="compile" />
@@ -60,7 +80,7 @@
     </target>
 
     <!-- Generate java classes from .aidl files. -->
-    <target name="aidl" depends="dirs">
+    <target name="aidl" depends="dirs, fix-perms">
         <apply executable="${aidl}" failonerror="true">
             <fileset dir="${srcdir}">
                 <include name="**/*.aidl"/>
