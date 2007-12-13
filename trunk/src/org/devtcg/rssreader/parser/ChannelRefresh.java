@@ -177,7 +177,7 @@ public class ChannelRefresh extends DefaultHandler
 			stream = iconUrl.openStream();
 
 			ico = mContent.openOutputStream(iconUri);
-			
+
 			byte[] b = new byte[1024];
 
 			int n;
