@@ -12,11 +12,11 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * TODO: This class needs to be generalized much better, with specialized
  * parsers for Atom 1.0, Atom 0.3, RSS 0.91, RSS 1.0 and RSS 2.0.  Hell,
  * this whole thing needs to be chucked and redone.
- * 
+ *
  * Date parser code lifted from Informa <http://informa.sourceforge.net>.
  */
 
@@ -56,12 +56,12 @@ public class ChannelRefresh extends DefaultHandler
 	private Handler mHandler;
 	private long mID;
 	private String mRSSURL;
-	
+
 	private ContentResolver mContent;
-	
+
 	/* Buffer post information as we learn it in STATE_IN_ITEM. */
-	private RSSChannelPost mPostBuf;
-	
+	private ChannelPost mPostBuf;
+
 	/* Efficiency is the name of the game here... */
 	private int mState;
 	private static final int STATE_IN_ITEM = (1 << 2);
@@ -71,15 +71,15 @@ public class ChannelRefresh extends DefaultHandler
 	private static final int STATE_IN_ITEM_DATE = (1 << 6);
 	private static final int STATE_IN_ITEM_AUTHOR = (1 << 7);
 	private static final int STATE_IN_TITLE = (1 << 8);
-	
+
 	private static HashMap<String, Integer> mStateMap;
-	
+
 	private static final SimpleDateFormat[] dateFormats;
 	private static final int dateFormat_default;
-	
+
 	static
 	{
-		mStateMap = new HashMap<String, Integer>();		
+		mStateMap = new HashMap<String, Integer>();
 		mStateMap.put("item", new Integer(STATE_IN_ITEM));
 		mStateMap.put("entry", new Integer(STATE_IN_ITEM));
 		mStateMap.put("title", new Integer(STATE_IN_ITEM_TITLE));
@@ -91,7 +91,7 @@ public class ChannelRefresh extends DefaultHandler
 		mStateMap.put("pubDate", new Integer(STATE_IN_ITEM_DATE));
 		mStateMap.put("dc:author", new Integer(STATE_IN_ITEM_AUTHOR));
 		mStateMap.put("author", new Integer(STATE_IN_ITEM_AUTHOR));
-		
+
 		dateFormat_default = 6;
 	    final String[] possibleDateFormats =
 	    {
@@ -109,13 +109,13 @@ public class ChannelRefresh extends DefaultHandler
 
 	    dateFormats = new SimpleDateFormat[possibleDateFormats.length];
 	    TimeZone gmtTZ = TimeZone.getTimeZone("GMT");
-	    
+
 	    for (int i = 0; i < possibleDateFormats.length; i++)
 	    {
 	    	/* TODO: Support other locales? */
 	    	dateFormats[i] = new SimpleDateFormat(possibleDateFormats[i],
 	    	  Locale.ENGLISH);
-	    	
+
 	    	dateFormats[i].setTimeZone(gmtTZ);
 	    }
 	}
@@ -131,7 +131,7 @@ public class ChannelRefresh extends DefaultHandler
 	 * that to mean that a new channel is being added (and also tested) so
 	 * the first meaningful piece of data encountered will trigger an insert
 	 * into the database.
-	 * 
+	 *
 	 * This logic is all just terrible, but this entire class needs to be
 	 * scrapped and redone to make room for improved cooperation with the rest
 	 * of the application.
@@ -155,13 +155,13 @@ public class ChannelRefresh extends DefaultHandler
 
 		return mID;
 	}
-	
+
 	public boolean updateFavicon(long id, String iconUrl)
 	  throws MalformedURLException
 	{
 		return updateFavicon(id, new URL(iconUrl));
 	}
-	
+
 	public boolean updateFavicon(long id, URL iconUrl)
 	{
 		InputStream stream = null;
@@ -183,7 +183,7 @@ public class ChannelRefresh extends DefaultHandler
 			int n;
 			while ((n = stream.read(b)) != -1)
 				ico.write(b, 0, n);
-			
+
 			r = true;
 		}
 		catch (Exception e)
@@ -202,7 +202,7 @@ public class ChannelRefresh extends DefaultHandler
 			}
 			catch (IOException e) { }
 		}
-		
+
 		return r;
 	}
 
@@ -211,13 +211,13 @@ public class ChannelRefresh extends DefaultHandler
 	{
 		/* HACK: when we see <title> outside of an <item>, assume it's the
 		 * feed title.  Only do this when we are inserting a new feed. */
-		if (mID == -1 && 
+		if (mID == -1 &&
 		    qName.equals("title") && (mState & STATE_IN_ITEM) == 0)
 		{
 			mState |= STATE_IN_TITLE;
 			return;
 		}
-		
+
 		Integer state = mStateMap.get(qName);
 
 		if (state != null)
@@ -225,11 +225,11 @@ public class ChannelRefresh extends DefaultHandler
 			mState |= state.intValue();
 
 			if (state.intValue() == STATE_IN_ITEM)
-				mPostBuf = new RSSChannelPost();
+				mPostBuf = new ChannelPost();
 			else if ((mState & STATE_IN_ITEM) != 0 && state.intValue() == STATE_IN_ITEM_LINK)
 			{
 				String href = attrs.getValue("href");
-				
+
 				if (href != null)
 					mPostBuf.link = href;
 			}
@@ -251,8 +251,8 @@ public class ChannelRefresh extends DefaultHandler
 					Log.d(TAG, "Oops, </item> found before feed title and our parser sucks too much to deal.");
 					return;
 				}
-				
-				String[] dupProj = 
+
+				String[] dupProj =
 				  new String[] { RSSReader.Posts._ID };
 
 				ContentURI listURI =
@@ -274,7 +274,7 @@ public class ChannelRefresh extends DefaultHandler
 					values.put(RSSReader.Posts.AUTHOR, mPostBuf.author);
 					values.put(RSSReader.Posts.DATE, mPostBuf.getDate());
 					values.put(RSSReader.Posts.BODY, mPostBuf.desc);
-					
+
 					mContent.insert(RSSReader.Posts.CONTENT_URI, values);
 				}
 			}
@@ -287,26 +287,26 @@ public class ChannelRefresh extends DefaultHandler
 		if (mID == -1 && (mState & STATE_IN_TITLE) != 0)
 		{
 			ContentValues values = new ContentValues();
-			
+
 			values.put(RSSReader.Channels.TITLE, new String(ch, start, length));
 			values.put(RSSReader.Channels.URL, mRSSURL);
-			
+
 			ContentURI added =
 			  mContent.insert(RSSReader.Channels.CONTENT_URI, values);
-			
+
 			mID = Long.parseLong(added.getPathSegment(1));
-			
+
 			/* There's no reason we need to do this ever, but we'll just be
 			 * good about removing this awful hack from runtime data. */
 			mState &= ~STATE_IN_TITLE;
-			
+
 			return;
 		}
-		
+
 		if ((mState & STATE_IN_ITEM) == 0)
 			return;
-		
-		/* 
+
+		/*
 		 * We sort of pretended that mState was inclusive, but really only
 		 * STATE_IN_ITEM is inclusive here.  This is a goofy design, but it is
 		 * done to make this code a bit simpler and more efficient.
@@ -332,7 +332,7 @@ public class ChannelRefresh extends DefaultHandler
 			/* Don't care... */
 		}
 	}
-	
+
 	/* Copied verbatim from Informa 0.7.0-alpha2 ParserUtils.java. */
 	private static Date parseDate(String strdate) {
 		Date result = null;
@@ -387,28 +387,28 @@ public class ChannelRefresh extends DefaultHandler
 
 		return result;
 	}
-	
-	private class RSSChannelPost
+
+	private class ChannelPost
 	{
 		public String title;
 		public Date date;
 		public String desc;
 		public String link;
 		public String author;
-		
-		public RSSChannelPost()
+
+		public ChannelPost()
 		{
 			/* Empty. */
 		}
-		
+
 		public void setDate(String str)
 		{
 			date = parseDate(str);
-			
+
 			if (date == null)
 				date = new Date();
 		}
-		
+
 		public String getDate()
 		{
 			return dateFormats[dateFormat_default].format(mPostBuf.date);

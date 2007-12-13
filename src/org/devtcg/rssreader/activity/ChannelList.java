@@ -45,37 +45,37 @@ public class ChannelList extends ListActivity
 {
 	public static final String TAG = "RSSChannelList";
 	public static final String TAG_PREFS = "RSSReader";
-	
+
 	public static final int DELETE_ID = Menu.FIRST;
 	public static final int INSERT_ID = Menu.FIRST + 1;
 	public static final int REFRESH_ID = Menu.FIRST + 2;
 	public static final int REFRESH_ALL_ID = Menu.FIRST + 3;
 	public static final int EDIT_ID = Menu.FIRST + 4;
-	
+
 	private Cursor mCursor;
-	
+
 //	private boolean mFirstTime;
-	
+
 //	private IRSSReaderService mService;
-	
+
 	private Handler mRefreshHandler;
 	private HashMap<Long, Thread> mRefreshThreads;
-	
+
     private static final String[] PROJECTION = new String[] {
       RSSReader.Channels._ID, RSSReader.Channels.ICON,
       RSSReader.Channels.TITLE, RSSReader.Channels.URL };
-    
+
     @Override
     protected void onCreate(Bundle icicle)
     {
         super.onCreate(icicle);
-        
+
         setContentView(R.layout.channel_list);
 
         Intent intent = getIntent();
         if (intent.getData() == null)
             intent.setData(RSSReader.Channels.CONTENT_URI);
-        
+
         if (intent.getAction() == null)
         	intent.setAction(Intent.VIEW_ACTION);
 
@@ -83,30 +83,30 @@ public class ChannelList extends ListActivity
 
 //        bindService(new Intent(this, RSSReaderService.class),
 //          null, mServiceConn, Context.BIND_AUTO_CREATE);
-        
+
 //        SharedPreferences settings = getSharedPreferences(TAG_PREFS, 0);
 //        mFirstTime = settings.getBoolean("firstTime", true);
-        
+
         /*
-         * If this is the first time the user has opened our app ever, 
+         * If this is the first time the user has opened our app ever,
          * install the RSSReaderService_Alarm as has been scheduled for
          * next device reboot.  After `firstTime`, RSSReaderService_Setup
          * will handle our setup at BOOT_COMPLETED.
-         * 
+         *
          * TODO: There must be a more appropriate way to handle this?
          */
 //        if (mFirstTime == true)
 //        	RSSReaderService_Setup.setupAlarm(this);
 
-        ListAdapter adapter = new RSSChannelListAdapter(mCursor, this);     
+        ListAdapter adapter = new ChannelListAdapter(mCursor, this);
         setListAdapter(adapter);
     }
-    
+
     @Override
     protected void onStop()
     {
     	super.onStop();
-    	
+
 //    	if (mFirstTime == true)
 //    	{
 //    		SharedPreferences settings = getSharedPreferences(TAG_PREFS, 0);
@@ -135,13 +135,13 @@ public class ChannelList extends ListActivity
     public boolean onCreateOptionsMenu(Menu menu)
     {
     	super.onCreateOptionsMenu(menu);
-    	
+
     	menu.add(0, INSERT_ID, "New Channel").
     	  setShortcut(KeyEvent.KEYCODE_3, 0, KeyEvent.KEYCODE_A);
-    	
+
     	return true;
     }
-    
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
@@ -159,24 +159,24 @@ public class ChannelList extends ListActivity
     		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
 
     		menu.add(Menu.SELECTED_ALTERNATIVE, REFRESH_ALL_ID, "Refresh All");
-  		
+
     		menu.add(Menu.SELECTED_ALTERNATIVE, REFRESH_ID, "Refresh Channel").
 		  	  setShortcut(0, 0, KeyEvent.KEYCODE_R);
-    		
+
     		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
-    		  
+
             Item edit = menu.add(Menu.SELECTED_ALTERNATIVE, EDIT_ID, "Edit Channel");
             edit.setIntent(new Intent(Intent.EDIT_ACTION, uri));
             edit.setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_E);
-            
+
             menu.add(Menu.SELECTED_ALTERNATIVE, DELETE_ID, "Delete Channel").
     		  setShortcut(KeyEvent.KEYCODE_2, 0, KeyEvent.KEYCODE_D);
-    		
+
     		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
-    		
+
     		menu.setDefaultItem(INSERT_ID);
     	}
-    	
+
     	return true;
     }
 
@@ -184,7 +184,7 @@ public class ChannelList extends ListActivity
     protected void onListItemClick(ListView l, View v, int position, long id)
     {
     	String action = getIntent().getAction();
-    	
+
     	if (action.equals(Intent.PICK_ACTION) ||
     	    action.equals(Intent.GET_CONTENT_ACTION))
     	{
@@ -206,24 +206,24 @@ public class ChannelList extends ListActivity
     	case INSERT_ID:
     		startActivity(new Intent(Intent.INSERT_ACTION, getIntent().getData()));
     		return true;
-    		
+
     	case DELETE_ID:
     		deleteChannel();
     		return true;
-    		
+
     	case REFRESH_ID:
-        	mCursor.moveTo(getSelection());    	        	
+        	mCursor.moveTo(getSelection());
     		refreshChannel();
     		return true;
-    		
+
     	case REFRESH_ALL_ID:
     		refreshAllChannels();
-    		return true;    		
+    		return true;
     	}
 
     	return super.onOptionsItemSelected(item);
     }
-    
+
     private final void deleteChannel()
     {
     	long channelId = getSelectionRowID();
@@ -263,10 +263,10 @@ public class ChannelList extends ListActivity
     	 */
     	if (mRefreshHandler == null)
     		mRefreshHandler = new Handler();
-    	
+
     	if (mRefreshThreads == null)
     		mRefreshThreads = new HashMap<Long, Thread>();
-    	
+
     	long channelId =
       	  mCursor.getInt(mCursor.getColumnIndex(RSSReader.Channels._ID));
 
@@ -279,30 +279,30 @@ public class ChannelList extends ListActivity
     	/* TODO: Is there a generalization of getListView().getSelectedView() we can use here?
     	 * http://groups.google.com/group/android-developers/browse_thread/thread/4070126fd996001c */
     	ChannelListRow row =
-    	  ((RSSChannelListAdapter)getListAdapter()).getViewByRowID(channelId);
+    	  ((ChannelListAdapter)getListAdapter()).getViewByRowID(channelId);
 
     	assert(row != null);
-    	
-		Runnable refresh = new RefreshRunnable(mRefreshHandler, row, channelId, rssurl); 
+
+		Runnable refresh = new RefreshRunnable(mRefreshHandler, row, channelId, rssurl);
 
     	Thread t = new Thread(refresh);
-    	
+
     	/* Manage active threads so we a) don't refresh an already refreshing
     	 * channel, and b) we can stop the thread if the user deletes the
     	 * channel. */
     	mRefreshThreads.put(channelId, t);
-    	
+
     	t.start();
     }
-    
-    private static class RSSChannelListAdapter extends CursorAdapter implements Filterable
+
+    private static class ChannelListAdapter extends CursorAdapter implements Filterable
     {
     	/* TODO: Android should provide a way to look up a View by row, but
     	 * it does not currently.  Hopefully this will be fixed in future
     	 * releases. */
     	private HashMap<Long, ChannelListRow> rowMap;
 
-		public RSSChannelListAdapter(Cursor c, Context context)
+		public ChannelListAdapter(Cursor c, Context context)
 		{
 			super(c, context);
 			rowMap = new HashMap<Long, ChannelListRow>();
@@ -312,10 +312,10 @@ public class ChannelList extends ListActivity
 		{
 			long channelId =
 			  cursor.getLong(cursor.getColumnIndex(RSSReader.Channels._ID));
-			
+
 			rowMap.put(new Long(channelId), row);
 		}
-		
+
 		@Override
 		public void bindView(View view, Context context, Cursor cursor)
 		{
@@ -332,13 +332,13 @@ public class ChannelList extends ListActivity
 			updateRowMap(cursor, row);
 			return row;
 		}
-		
+
 		public ChannelListRow getViewByRowID(long id)
 		{
 			return rowMap.get(new Long(id));
 		}
     }
-    
+
     private class RefreshRunnable implements Runnable
     {
     	private Handler mHandler;

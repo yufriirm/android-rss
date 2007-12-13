@@ -64,7 +64,7 @@ public class PostList extends ListActivity
 		mCursor = managedQuery(uri, PROJECTION, null, null);
 		mID = Long.parseLong(uri.getPathSegment(1));
 
-		ListAdapter adapter = new RSSPostListAdapter(mCursor, this);
+		ListAdapter adapter = new PostListAdapter(mCursor, this);
         setListAdapter(adapter);
         
         initWithData();
@@ -237,9 +237,9 @@ public class PostList extends ListActivity
     	return false;
     }
 
-    private static class RSSPostListAdapter extends CursorAdapter implements Filterable
+    private static class PostListAdapter extends CursorAdapter implements Filterable
     {
-		public RSSPostListAdapter(Cursor c, Context context)
+		public PostListAdapter(Cursor c, Context context)
 		{
 			super(c, context);
 		}
