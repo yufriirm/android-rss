@@ -111,6 +111,7 @@ public class ChannelListRow extends RelativeLayout
 		Typeface tf;
 
 		int unreadCount = unread.count();
+		unread.close();
 
 		if (unreadCount > 0)
 			tf = Typeface.DEFAULT_BOLD;
@@ -168,5 +169,6 @@ public class ChannelListRow extends RelativeLayout
 		
 		cursor.first();
 		finishRefresh(cursor);
+		cursor.close();
 	}
 }

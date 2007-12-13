@@ -181,6 +181,8 @@ public class PostList extends ListActivity
     			mNextID = cChannelList.getLong(0);
     		}
     	}
+
+		cChannelList.close();
     }
     
     private void moveTo(long id)
