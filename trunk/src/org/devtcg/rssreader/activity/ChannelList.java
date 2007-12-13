@@ -21,6 +21,7 @@ import java.util.HashMap;
 import org.devtcg.rssreader.R;
 import org.devtcg.rssreader.parser.ChannelRefresh;
 import org.devtcg.rssreader.provider.RSSReader;
+import org.devtcg.rssreader.util.DownloadManager;
 import org.devtcg.rssreader.view.ChannelListRow;
 
 import android.app.ListActivity;
@@ -58,8 +59,9 @@ public class ChannelList extends ListActivity
 
 //	private IRSSReaderService mService;
 
+	private DownloadManager mDownloadManager;
 	private Handler mRefreshHandler;
-	private HashMap<Long, Thread> mRefreshThreads;
+//	private HashMap<Long, Thread> mRefreshThreads;
 
     private static final String[] PROJECTION = new String[] {
       RSSReader.Channels._ID, RSSReader.Channels.ICON,
@@ -228,13 +230,13 @@ public class ChannelList extends ListActivity
     {
     	long channelId = getSelectionRowID();
 
-    	Thread refresh;
-
-    	if (mRefreshThreads != null &&
-    	    (refresh = mRefreshThreads.remove(channelId)) != null)
-    	{
-    		/* TODO: Stop the thread. */
-    	}
+//    	Thread refresh;
+//
+//    	if (mRefreshThreads != null &&
+//    	    (refresh = mRefreshThreads.remove(channelId)) != null)
+//    	{
+//    		/* TODO: Stop the thread. */
+//    	}
 
 		/* Delete related posts. */
 		getContentResolver().delete(RSSReader.Posts.CONTENT_URI,
@@ -247,8 +249,9 @@ public class ChannelList extends ListActivity
     {
     	if (mCursor.first() == false)
     		return;
-
-    	do {
+    	
+    	do 
+    	{
     		refreshChannel();
     	} while (mCursor.next() == true);
     }
@@ -258,21 +261,25 @@ public class ChannelList extends ListActivity
     private final void refreshChannel()
     {
     	/* We don't initialize these unless the user requests a refresh.
-    	 * The common case is that the background service (not finished
-    	 * yet) will handle refresh.
+    	 * The common case is that the background service will be responsible
+    	 * for this task, so the behaviour in this activity will rarely be
+    	 * invoked.
     	 */
-    	if (mRefreshHandler == null)
+    	if (mDownloadManager == null)
+    	{
     		mRefreshHandler = new Handler();
+    		mDownloadManager = new DownloadManager(mRefreshHandler);
+    	}
 
-    	if (mRefreshThreads == null)
-    		mRefreshThreads = new HashMap<Long, Thread>();
+//    	if (mRefreshThreads == null)
+//    		mRefreshThreads = new HashMap<Long, Thread>();
 
     	long channelId =
       	  mCursor.getInt(mCursor.getColumnIndex(RSSReader.Channels._ID));
 
-    	/* Don't refresh the same channel more than once. */
-    	if (mRefreshThreads.containsKey(channelId) == true)
-    		return;
+//    	/* Don't refresh the same channel more than once. */
+//    	if (mRefreshThreads.containsKey(channelId) == true)
+//    		return;
 
     	String rssurl = mCursor.getString(mCursor.getColumnIndex(RSSReader.Channels.URL));
 
@@ -285,14 +292,16 @@ public class ChannelList extends ListActivity
 
 		Runnable refresh = new RefreshRunnable(mRefreshHandler, row, channelId, rssurl);
 
-    	Thread t = new Thread(refresh);
+		mDownloadManager.schedule(refresh);
 
-    	/* Manage active threads so we a) don't refresh an already refreshing
-    	 * channel, and b) we can stop the thread if the user deletes the
-    	 * channel. */
-    	mRefreshThreads.put(channelId, t);
-
-    	t.start();
+//    	Thread t = new Thread(refresh);
+//
+//    	/* Manage active threads so we a) don't refresh an already refreshing
+//    	 * channel, and b) we can stop the thread if the user deletes the
+//    	 * channel. */
+//    	mRefreshThreads.put(channelId, t);
+//
+//    	t.start();
     }
 
     private static class ChannelListAdapter extends CursorAdapter implements Filterable
@@ -380,7 +389,7 @@ public class ChannelList extends ListActivity
 	    		public void run()
 	    		{
 	    			mRow.finishRefresh(mChannelID);
-	    			mRefreshThreads.remove(mChannelID);
+//	    			mRefreshThreads.remove(mChannelID);
 	    		}
 	    	});
     	}
