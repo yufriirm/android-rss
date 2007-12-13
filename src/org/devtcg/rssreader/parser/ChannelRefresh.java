@@ -277,6 +277,8 @@ public class ChannelRefresh extends DefaultHandler
 
 					mContent.insert(RSSReader.Posts.CONTENT_URI, values);
 				}
+
+				dup.close();
 			}
 		}
 	}
