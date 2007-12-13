@@ -35,6 +35,15 @@
     <property name="android-jar" value="${sdk-folder}/android.jar" />
 
     <!-- Rules -->
+    <target name="tags">
+        <exec executable="ctags">
+            <arg value="--recurse=yes" />
+            <arg value="--links=yes" />
+            <arg value="--java-types=cimp" />
+            <arg value="-f tags" />
+            <arg value="." />
+        </exec>
+    </target>
 
     <!-- Create the output directories if they don't exist yet. -->
     <target name="dirs">
@@ -43,22 +52,16 @@
     </target>
 
     <target name="fix-perms">
-        <fileset dir="${outdir-r}" id="android-tools.R.files">
-            <include name="**/R.java" />
-        </fileset>
-
-        <fileset dir="${srcdir}" id="android-tools.aidl.files">
-            <include name="**/*.aidl" />
+        <fileset dir="${srcdir}" id="project.src.files">
+			<include name="**/*.java" />
         </fileset>
 
         <chmod perm="u+w">
-            <fileset refid="android-tools.R.files" />
-            <fileset refid="android-tools.aidl.files" />
+            <fileset refid="project.src.files" />
         </chmod>
 
         <attrib readonly="false">
-            <fileset refid="android-tools.R.files" />
-            <fileset refid="android-tools.aidl.files" />
+            <fileset refid="project.src.files" />
         </attrib>
     </target>
 
@@ -89,7 +92,7 @@
     </target>
 
     <!-- Compile this project's .java files into .class files. -->
-    <target name="compile" depends="dirs, resource-src, aidl">
+    <target name="compile" depends="dirs, resource-src, aidl, tags">
         <javac encoding="ascii" target="1.5" debug="true" extdirs=""
                 srcdir="."
                 destdir="${outdir-classes}"
