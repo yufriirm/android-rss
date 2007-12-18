@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.devtcg.rssreader.R;
 import org.devtcg.rssreader.provider.RSSReader;
+import org.devtcg.rssreader.util.KeyUtils;
 import org.devtcg.rssreader.view.ChannelHead;
 
 import android.app.Activity;
@@ -30,6 +31,7 @@ import android.database.Cursor;
 import android.net.ContentURI;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.webkit.WebView;
@@ -38,6 +40,8 @@ import android.widget.TextView;
 
 public class PostView extends Activity
 {
+	private static final String TAG = "PostView";
+	
 	private final static int NEXT_POST_ID = Menu.FIRST;
 	private final static int PREV_POST_ID = Menu.FIRST + 1;
 	
@@ -167,12 +171,9 @@ public class PostView extends Activity
 			
 		return true;
 	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu)
+	
+	private void getSiblings()
 	{
-		menu.removeGroup(0);
-
 		if (mNextPostID < 0 || mPrevPostID < 0)
 		{
 	    	Cursor cPostList = getContentResolver().query
@@ -210,8 +211,16 @@ public class PostView extends Activity
 	    			mPrevPostID = cPostList.getLong(indexId);
 	    		}
 	    	}
-		}
+		}		
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu)
+	{
+		menu.removeGroup(0);
 		
+		getSiblings();
+
 		if (mNextPostID >= 0)
 		{
 			menu.add(0, NEXT_POST_ID, "Newer Post").
@@ -228,34 +237,77 @@ public class PostView extends Activity
 		
 		return true;
 	}
+	
+	private void moveTo(long id)
+	{
+		Intent intent = new Intent(Intent.VIEW_ACTION,
+		  RSSReader.Posts.CONTENT_URI.addId(id));
+		
+		startActivity(intent);
+		
+		/* Assume that user would do not want to keep the [now read]
+		 * current post in the history stack. */
+		finish();
+	}
+	
+	private boolean prevPost()
+	{
+		if (mPrevPostID < 0)
+			return false;
+		
+		moveTo(mPrevPostID);
+		return true;
+	}
+	
+	private boolean nextPost()
+	{
+		if (mNextPostID < 0)
+			return false;
+		
+		moveTo(mNextPostID);
+		return true;
+	}
 
     @Override
     public boolean onOptionsItemSelected(Menu.Item item)
     {
-    	ContentURI uri = RSSReader.Posts.CONTENT_URI;
-    	
-    	int itemId = item.getId();
-    	
-    	if (itemId == NEXT_POST_ID || itemId == PREV_POST_ID)
+    	switch (item.getId())
     	{
-    		long postId;
+    	case PREV_POST_ID:
+    		return prevPost();
     		
-    		if (itemId == NEXT_POST_ID)
-    			postId = mNextPostID;
-    		else
-    			postId = mPrevPostID;
-    		
-    		Intent intent = new Intent(Intent.VIEW_ACTION, uri.addId(postId));
-    		startActivity(intent);
-    		
-    		/* Assume that user would do not want to keep the [now read]
-    		 * current post in the history stack. */
-    		finish();
-    		
-    		return true;
+    	case NEXT_POST_ID:
+    		return nextPost();
     	}
     	
     	return super.onOptionsItemSelected(item);
+    }
+    
+    @Override
+	public boolean onKeyUp(int keyCode, KeyEvent event)
+    {
+    	/*
+    	 * If the user actually presses left or right, let's pass that key
+    	 * press on to the WebView in case scrolling is necessary.  All 
+    	 * other direction keypresses (keypad, bracket, etc) as defined
+    	 * by KeyUtils.interpretDirection() will still be honored.
+    	 */
+    	if (keyCode != KeyEvent.KEYCODE_DPAD_LEFT &&
+    	    keyCode != KeyEvent.KEYCODE_DPAD_RIGHT)
+    	{
+    		switch (KeyUtils.interpretDirection(keyCode))
+    		{
+    		case KeyEvent.KEYCODE_DPAD_LEFT:
+    			getSiblings();
+    			return nextPost();
+
+    		case KeyEvent.KEYCODE_DPAD_RIGHT:
+    			getSiblings();
+    			return prevPost();
+    		}
+    	}
+    	
+    	return false;
     }
 
     /* 
