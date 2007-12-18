@@ -34,13 +34,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-/*
- * Simple widget that draws the channel heading for RSSPostView and 
- * RSSPostList.  Will optionally show either the channel logo, or the
- * channel icon + channel text.
- * 
- * TODO: I have no idea what I'm doing here.  The abstraction for
- * RSSChannelHead seems correct, but the implementation is surely all wrong.
+/**
+ * Simple widget that draws the channel heading for PostView and PostList.
+ * Currently only shows the site icon and the channel name, but could one day
+ * be extended to show the site logo or other information.
  */
 public class ChannelHead extends LinearLayout
 {
@@ -56,11 +53,21 @@ public class ChannelHead extends LinearLayout
 	/* Default padding for each widget. */
 	private static final int paddingTop = 2;
 	private static final int paddingBottom = 6;
+
+	public ChannelHead(Context context)
+	{
+		super(context);
+		init(context);
+	}
 	
 	public ChannelHead(Context context, AttributeSet attrs, Map inflateParams)
 	{
 		super(context, attrs, inflateParams);
-		
+		init(context);
+	}
+
+	private void init(Context context)
+	{
 		mRect = new Rect();
 		mGray = new Paint();		
 		mGray.setStyle(Paint.Style.STROKE);
@@ -89,6 +96,11 @@ public class ChannelHead extends LinearLayout
 		super.dispatchDraw(canvas);
 	}
 	
+	/**
+	 * Set channel data for display.
+	 *
+	 * @see #setLogo(Cursor)
+	 */
 	public void setLogo(String channelName, String iconData, String logoData)
 	{
 		/* TODO */
@@ -126,41 +138,13 @@ public class ChannelHead extends LinearLayout
 		mLogoText.setText(channelName);
 	}
 	
-	/* Convenience method to access the logo data from a Channel cursor. */
+	/**
+	 * Convenience method to access the logo data from a Channel cursor.
+	 */
 	public void setLogo(Cursor cursor)
 	{
 		setLogo(cursor.getString(cursor.getColumnIndex(RSSReader.Channels.TITLE)),
 		  cursor.getString(cursor.getColumnIndex(RSSReader.Channels.ICON)),
 		  cursor.getString(cursor.getColumnIndex(RSSReader.Channels.LOGO)));
-	}
-	
-	private String mPostTitle;
-	private boolean mPostTitleVisible;
-	
-	public void setPost(String postTitle)
-	{
-		mPostTitle = postTitle;
-	}
-	
-	public void setPost(Cursor cursor)
-	{
-		setPost(cursor.getString(cursor.getColumnIndex(RSSReader.Posts.TITLE)));
-	}
-	
-	public void showPostTitle()
-	{
-		mLogoText.setText(mPostTitle);		
-		mPostTitleVisible = true;
-	}
-	
-	public void showChannelTitle()
-	{
-		mLogoText.setText("Test Channel");
-		mPostTitleVisible = false;
-	}
-	
-	public boolean isPostTitleVisible()
-	{
-		return mPostTitleVisible; 
 	}
 }

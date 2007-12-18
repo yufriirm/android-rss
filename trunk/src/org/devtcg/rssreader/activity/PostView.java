@@ -108,7 +108,7 @@ public class PostView extends Activity
 		/* Make the view useful. */
 		ChannelHead head = (ChannelHead)findViewById(R.id.postViewHead);
 		head.setLogo(cChannel);
-		head.setPost(mCursor);
+//		head.setPost(mCursor);
 
 		cChannel.close();
 
@@ -310,67 +310,67 @@ public class PostView extends Activity
     	return false;
     }
 
-    /* 
-     * Special ScrollView class that is used to determine if the post title
-     * is currently visible.  If not, it will change it to show the
-     * RSSChannelHead to show the title with a flashy animation to show
-     * off Android goodness.
-     */
-    public static class PostScrollView extends ScrollView
-    {
-    	private int mTitleTop = 0;
-    	private ChannelHead mHead;
-    	
-    	public PostScrollView(Context context)
-    	{
-    		super(context);
-    	}
-
-    	public PostScrollView(Context context, AttributeSet attrs, Map inflateParams)
-    	{
-    		super(context, attrs, inflateParams);
-    	}
-
-    	public PostScrollView(Context context, AttributeSet attrs, Map inflateParams, int defStyle)
-    	{
-    		super(context, attrs, inflateParams, defStyle);
-    	}
-    	
-    	public void setChannelHead(ChannelHead head)
-    	{
-    		mHead = head;
-    	}
-    	
-    	@Override
-        /* TODO: Overriding computeScroll() does not seem to be an efficient
-         * way to tackle this problem.  Any suggestions for improvement? */ 
-    	public void computeScroll()
-    	{
-    		super.computeScroll();
-
-    		if (mTitleTop < 0)
-    		{
-    			TextView title = (TextView)findViewById(R.id.postTitle);
-
-    			if (title != null)
-    			{
-    				mTitleTop = title.getLineHeight() / 2;
-    				assert(mTitleTop > 0);
-    			}
-    		}
-    		else
-    		{
-    			if (mScrollY > mTitleTop)
-    			{
-    				if (mHead.isPostTitleVisible() == false)
-    					mHead.showPostTitle();
-    			}
-    			else
-    			{
-    				if (mHead.isPostTitleVisible() == true)
-    					mHead.showChannelTitle();
-    			}
-    		}
-    	}
-    }
+//    /* 
+//     * Special ScrollView class that is used to determine if the post title
+//     * is currently visible.  If not, it will change it to show the
+//     * RSSChannelHead to show the title with a flashy animation to show
+//     * off Android goodness.
+//     */
+//    public static class PostScrollView extends ScrollView
+//    {
+//    	private int mTitleTop = 0;
+//    	private ChannelHead mHead;
+//    	
+//    	public PostScrollView(Context context)
+//    	{
+//    		super(context);
+//    	}
+//
+//    	public PostScrollView(Context context, AttributeSet attrs, Map inflateParams)
+//    	{
+//    		super(context, attrs, inflateParams);
+//    	}
+//
+//    	public PostScrollView(Context context, AttributeSet attrs, Map inflateParams, int defStyle)
+//    	{
+//    		super(context, attrs, inflateParams, defStyle);
+//    	}
+//    	
+//    	public void setChannelHead(ChannelHead head)
+//    	{
+//    		mHead = head;
+//    	}
+//    	
+//    	@Override
+//        /* TODO: Overriding computeScroll() does not seem to be an efficient
+//         * way to tackle this problem.  Any suggestions for improvement? */ 
+//    	public void computeScroll()
+//    	{
+//    		super.computeScroll();
+//
+//    		if (mTitleTop < 0)
+//    		{
+//    			TextView title = (TextView)findViewById(R.id.postTitle);
+//
+//    			if (title != null)
+//    			{
+//    				mTitleTop = title.getLineHeight() / 2;
+//    				assert(mTitleTop > 0);
+//    			}
+//    		}
+//    		else
+//    		{
+//    			if (mScrollY > mTitleTop)
+//    			{
+//    				if (mHead.isPostTitleVisible() == false)
+//    					mHead.showPostTitle();
+//    			}
+//    			else
+//    			{
+//    				if (mHead.isPostTitleVisible() == true)
+//    					mHead.showChannelTitle();
+//    			}
+//    		}
+//    	}
+//    }
 }
