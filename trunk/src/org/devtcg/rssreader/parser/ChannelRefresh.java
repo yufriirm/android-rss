@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -152,7 +153,10 @@ public class ChannelRefresh extends DefaultHandler
 		xr.setErrorHandler(this);
 
 		URL url = new URL(mRSSURL);
-		xr.parse(new InputSource(url.openStream()));
+		
+		URLConnection c = url.openConnection();
+		c.setRequestProperty("User-Agent", "Android/m3-rc37a");
+		xr.parse(new InputSource(c.getInputStream()));
 
 		return mID;
 	}
