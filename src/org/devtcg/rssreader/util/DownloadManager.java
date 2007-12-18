@@ -29,7 +29,7 @@ import android.util.Log;
  * This class implements a strategy to gracefully satisfy the "refresh all"
  * semantics.  The default behaviour is to spawn a new connection {@link
  * Thread} every 8 seconds or whenever the previously queued {@link Thread}
- * finishes execution.  There is no specific awareness of what is action is
+ * finishes execution.  There is no specific awareness of what action is
  * being performed by the spawned {@link Thread}, nor is it even necessary that
  * the {@link Thread} utilize the network.
  *
@@ -68,7 +68,7 @@ public class DownloadManager
 	}
 
 	/**
-	 * Schedule a new worker.  This method does not suck.
+	 * Schedule a new download worker.
 	 *
 	 * @param r 
 	 *   Worker Runnable to be scheduled.
