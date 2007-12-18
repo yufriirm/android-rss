@@ -86,6 +86,7 @@ public class ChannelRefresh extends DefaultHandler
 		mStateMap.put("link", new Integer(STATE_IN_ITEM_LINK));
 		mStateMap.put("description", new Integer(STATE_IN_ITEM_DESC));
 		mStateMap.put("content", new Integer(STATE_IN_ITEM_DESC));
+		mStateMap.put("content:encoded", new Integer(STATE_IN_ITEM_DESC));
 		mStateMap.put("dc:date", new Integer(STATE_IN_ITEM_DATE));
 		mStateMap.put("updated", new Integer(STATE_IN_ITEM_DATE));
 		mStateMap.put("pubDate", new Integer(STATE_IN_ITEM_DATE));
