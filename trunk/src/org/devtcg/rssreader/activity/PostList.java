@@ -18,6 +18,7 @@ package org.devtcg.rssreader.activity;
 
 import org.devtcg.rssreader.R;
 import org.devtcg.rssreader.provider.RSSReader;
+import org.devtcg.rssreader.util.KeyUtils;
 import org.devtcg.rssreader.view.ChannelHead;
 import org.devtcg.rssreader.view.PostListRow;
 
@@ -217,21 +218,13 @@ public class PostList extends ListActivity
     @Override
 	public boolean onKeyUp(int keyCode, KeyEvent event)
     {
-    	switch (keyCode)
+    	switch (KeyUtils.interpretDirection(keyCode))
     	{
-    	case KeyEvent.KEYCODE_LEFT_BRACKET:
     	case KeyEvent.KEYCODE_DPAD_LEFT:
-    	case KeyEvent.KEYCODE_1:
-    	case KeyEvent.KEYCODE_4:
-    	case KeyEvent.KEYCODE_7:
     		getSiblings();
     		return prevChannel();
     		
-    	case KeyEvent.KEYCODE_RIGHT_BRACKET:
     	case KeyEvent.KEYCODE_DPAD_RIGHT:
-    	case KeyEvent.KEYCODE_3:
-    	case KeyEvent.KEYCODE_6:
-    	case KeyEvent.KEYCODE_9:
     		getSiblings();
     		return nextChannel();
     	}
