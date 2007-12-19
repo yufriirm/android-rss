@@ -16,8 +16,6 @@
 
 package org.devtcg.rssreader.activity;
 
-import java.util.Map;
-
 import org.devtcg.rssreader.R;
 import org.devtcg.rssreader.provider.RSSReader;
 import org.devtcg.rssreader.util.KeyUtils;
@@ -25,17 +23,13 @@ import org.devtcg.rssreader.view.ChannelHead;
 
 import android.app.Activity;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.ContentURI;
 import android.os.Bundle;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.webkit.WebView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class PostView extends Activity
