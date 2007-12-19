@@ -53,10 +53,10 @@ public class PostListRow extends ViewGroup
 
 	static
 	{
-		mDateFmtDB = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+		mDateFmtDB = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 		mDateFmtToday = new SimpleDateFormat("h:mma");
 
-		/* TODO: Format date according to the current locale. */
+		/* TODO: Format date according to the current locale preference. */
 		mDateFmt = new SimpleDateFormat("MM/dd/yyyy h:mma");
 	}
 
@@ -160,14 +160,14 @@ public class PostListRow extends ViewGroup
 		try
 		{
 			Date date = mDateFmtDB.parse(datestr);
-			
+
 			Calendar then = new GregorianCalendar();
 			then.setTime(date);
-			
+
 			Calendar now = new GregorianCalendar();
 
 			SimpleDateFormat fmt;
-			
+
 			if (now.get(Calendar.DAY_OF_YEAR) == then.get(Calendar.DAY_OF_YEAR))
 				fmt = mDateFmtToday;
 			else
