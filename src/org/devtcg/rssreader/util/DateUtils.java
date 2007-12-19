@@ -35,7 +35,7 @@ public class DateUtils
 	private static final String TAG = "DateUtils";
 	
 	private static final SimpleDateFormat[] dateFormats;
-	private static final int dateFormat_default = 6;
+	private static final int dateFormat_default = 2;
 
 	private DateUtils() { }
 
