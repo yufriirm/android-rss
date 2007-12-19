@@ -38,6 +38,8 @@ import android.widget.TextView;
 
 public class PostListRow extends ViewGroup
 {
+	private static final String TAG = "PostListRow";
+	
 	private static final int SUBJECT_ID = 1;
 	private static final int DATE_ID = 2;
 
@@ -177,9 +179,7 @@ public class PostListRow extends ViewGroup
 		}
 		catch (ParseException e)
 		{
-			/* What the hell?  We screwed our database? */
-			Log.d("RSSPostListRow", Log.getStackTraceString(e));
-			mDate.setText("");
-		}
+			Log.d(TAG, Log.getStackTraceString(e));
+		}		
 	}
 }
