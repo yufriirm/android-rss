@@ -18,7 +18,10 @@ package org.devtcg.rssreader.view;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import org.devtcg.rssreader.provider.RSSReader;
 
@@ -157,21 +160,18 @@ public class PostListRow extends ViewGroup
 		try
 		{
 			Date date = mDateFmtDB.parse(datestr);
+			
+			Calendar then = new GregorianCalendar();
+			then.setTime(date);
+			
+			Calendar now = new GregorianCalendar();
 
 			SimpleDateFormat fmt;
-			Date now = new Date();
-
-			/* TODO: Yeah, yeah, deprecated, I get it... */
-			if (now.getDate() == date.getDate() &&
-			    now.getMonth() == date.getMonth() &&
-			    now.getYear() == date.getYear())
-			{
+			
+			if (now.get(Calendar.DAY_OF_YEAR) == then.get(Calendar.DAY_OF_YEAR))
 				fmt = mDateFmtToday;
-			}
 			else
-			{
 				fmt = mDateFmt;
-			}
 
 			mDate.setText(fmt.format(date));
 		}
