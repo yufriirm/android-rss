@@ -104,10 +104,6 @@ public class ChannelList extends ListActivity
 
         ListAdapter adapter = new ChannelListAdapter(mCursor, this);
         setListAdapter(adapter);
-//        setListAdapter(new SimpleCursorAdapter(this,
-//          android.R.layout.simple_list_item_1, mCursor,
-//          new String[] { RSSReader.Channels.TITLE },
-//          new int[] { android.R.id.text1 }));
     }
 
     @Override

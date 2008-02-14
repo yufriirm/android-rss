@@ -59,7 +59,7 @@ public class ChannelHead extends LinearLayout
 		super(context);
 		init(context);
 	}
-	
+
 	public ChannelHead(Context context, AttributeSet attrs, Map inflateParams)
 	{
 		super(context, attrs, inflateParams);
@@ -72,7 +72,7 @@ public class ChannelHead extends LinearLayout
 		mGray = new Paint();		
 		mGray.setStyle(Paint.Style.STROKE);
 		mGray.setColor(0xff9c9e9c);
-		
+
 		mBlack1 = new Paint();		
 		mBlack1.setStyle(Paint.Style.STROKE);
 		mBlack1.setColor(0xbb000000);
@@ -95,7 +95,7 @@ public class ChannelHead extends LinearLayout
 
 		super.dispatchDraw(canvas);
 	}
-	
+
 	/**
 	 * Set channel data for display.
 	 *
@@ -118,7 +118,7 @@ public class ChannelHead extends LinearLayout
 			
 			addView(mIcon, iconRules);
 		}
-		
+
 		if (iconData != null)
 		{
 			mIcon.setImageURI(Uri.parse(iconData));
