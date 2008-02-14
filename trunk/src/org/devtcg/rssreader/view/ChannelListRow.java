@@ -18,6 +18,7 @@ package org.devtcg.rssreader.view;
 
 import java.net.URISyntaxException;
 
+import org.devtcg.rssreader.R;
 import org.devtcg.rssreader.provider.RSSReader;
 
 import android.content.ContentResolver;
@@ -28,8 +29,11 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
+import android.view.ViewInflate;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -41,9 +45,9 @@ public class ChannelListRow extends RelativeLayout
 	private TextView mCount;
 	private ProgressBar mRefresh;
 
-	private static final int CHANNEL_NAME = 1;
-	private static final int CHANNEL_RIGHT = 2;
-	private static final int CHANNEL_ICON = 3;
+//	private static final int CHANNEL_NAME = 1;
+//	private static final int CHANNEL_RIGHT = 2;
+//	private static final int CHANNEL_ICON = 3;
 
 	public ChannelListRow(Context context)
 	{
@@ -51,50 +55,63 @@ public class ChannelListRow extends RelativeLayout
 
 		setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 
-		mIcon = new ImageView(context);
-		mIcon.setPadding(0, 2, 3, 2);
-		mIcon.setId(CHANNEL_ICON);
+		View view = ViewInflate.from(getContext()).inflate(R.layout.channel_list_item, null, false, null);
 
-		RelativeLayout.LayoutParams iconRules =
-		  new RelativeLayout.LayoutParams(16 + 3, 16 + 4);
+		mIcon = (ImageView)view.findViewById(R.id.channel_icon);
+		mName = (TextView)view.findViewById(R.id.channel_name);
+		mCount = (TextView)view.findViewById(R.id.channel_post_count);
+		mRefresh = (ProgressBar)view.findViewById(R.id.channel_refresh);
+		mRefresh.setVisibility(View.GONE);
 		
-		iconRules.addRule(ALIGN_WITH_PARENT_LEFT);
-		addView(mIcon, iconRules);
-		
-		LinearLayout rightSide = new LinearLayout(context);
-		rightSide.setId(CHANNEL_RIGHT);
-		
-		/* <right> */
-		mRefresh = new ProgressBar(context);
-		mRefresh.setIndeterminate(true);
-		mRefresh.setVisibility(GONE);
-		
-		LinearLayout.LayoutParams refreshRules = new LinearLayout.LayoutParams(18, 18);
-		refreshRules.gravity = Gravity.CENTER_VERTICAL;
-		rightSide.addView(mRefresh, refreshRules);
+		RelativeLayout.LayoutParams rules =
+		  new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		addView(view, rules);
 
-		mCount = new TextView(context);
-		mCount.setGravity(Gravity.CENTER_VERTICAL);
-		rightSide.addView(mCount, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-		/* </right> */
-		
-		RelativeLayout.LayoutParams rightRules =
-		  new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		
-		rightRules.addRule(ALIGN_WITH_PARENT_RIGHT);
-		
-		addView(rightSide, rightRules);
-		
-		mName = new TextView(context);
-		mName.setPadding(3, 0, 0, 0);
-		mName.setId(CHANNEL_NAME);
 
-		RelativeLayout.LayoutParams nameRules =
-		  new RelativeLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT);
-
-		nameRules.addRule(POSITION_TO_LEFT, CHANNEL_RIGHT);
-		nameRules.addRule(POSITION_TO_RIGHT, CHANNEL_ICON);
-		addView(mName, nameRules);    		
+//		mIcon = new ImageView(context);
+//		mIcon.setPadding(0, 2, 3, 2);
+//		mIcon.setId(CHANNEL_ICON);
+//
+//		RelativeLayout.LayoutParams iconRules =
+//		  new RelativeLayout.LayoutParams(16 + 3, 16 + 4);
+//		
+//		iconRules.addRule(ALIGN_WITH_PARENT_LEFT);
+//		addView(mIcon, iconRules);
+//		
+//		LinearLayout rightSide = new LinearLayout(context);
+//		rightSide.setId(CHANNEL_RIGHT);
+//		
+//		/* <right> */
+//		mRefresh = new ProgressBar(context);
+//		mRefresh.setIndeterminate(true);
+//		mRefresh.setVisibility(GONE);
+//		
+//		LinearLayout.LayoutParams refreshRules = new LinearLayout.LayoutParams(18, 18);
+//		refreshRules.gravity = Gravity.CENTER_VERTICAL;
+//		rightSide.addView(mRefresh, refreshRules);
+//
+//		mCount = new TextView(context);
+//		mCount.setGravity(Gravity.CENTER_VERTICAL);
+//		rightSide.addView(mCount, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+//		/* </right> */
+//		
+//		RelativeLayout.LayoutParams rightRules =
+//		  new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+//		
+//		rightRules.addRule(ALIGN_WITH_PARENT_RIGHT);
+//		
+//		addView(rightSide, rightRules);
+//		
+//		mName = new TextView(context);
+//		mName.setPadding(3, 0, 0, 0);
+//		mName.setId(CHANNEL_NAME);
+//
+//		RelativeLayout.LayoutParams nameRules =
+//		  new RelativeLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT);
+//
+//		nameRules.addRule(POSITION_TO_LEFT, CHANNEL_RIGHT);
+//		nameRules.addRule(POSITION_TO_RIGHT, CHANNEL_ICON);
+//		addView(mName, nameRules);    		
 	}
 
 	public void bindView(Cursor cursor)
@@ -124,7 +141,7 @@ public class ChannelListRow extends RelativeLayout
 		
 		mIcon.setImageURI(Uri.parse(icon));
 
-		mName.setTypeface(tf);
+		mName.setTypeface(Typeface.DEFAULT);
 		mName.setText(cursor, cursor.getColumnIndex(RSSReader.Channels.TITLE));
 
 		mCount.setTypeface(tf);

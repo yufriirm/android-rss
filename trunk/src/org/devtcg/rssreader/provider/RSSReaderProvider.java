@@ -207,9 +207,14 @@ public class RSSReaderProvider extends ContentProvider
 		}
 	}
 	
+	private String getIconFilename(long channelId)
+	{
+		return "channel" + channelId + ".ico";
+	}
+
 	private String getIconPath(long channelId)
 	{
-		return getContext().getFileStreamPath("channel" + channelId + ".ico").getAbsolutePath();
+		return getContext().getFileStreamPath(getIconFilename(channelId)).getAbsolutePath();
 	}
 	
 	private void copyDefaultIcon(String path)
@@ -230,7 +235,7 @@ public class RSSReaderProvider extends ContentProvider
 		
 		out.close();
 	}
-
+	
 	public ParcelFileDescriptor openFile(Uri uri, String mode)
 	  throws FileNotFoundException
 	{
@@ -245,9 +250,9 @@ public class RSSReaderProvider extends ContentProvider
 			 * readable. */
 			if (mode.equals("rw") == true)
 			{
-				FileOutputStream foo = new FileOutputStream(path);
+				FileOutputStream foo = getContext().openFileOutput(getIconFilename(id), 0);
 				
-				try { foo.close(); }
+				try { foo.write(new byte[] { 't' }); foo.close(); }
 				catch (Exception e) { }
 			}
 
