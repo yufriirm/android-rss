@@ -42,6 +42,7 @@ import android.widget.CursorAdapter;
 import android.widget.Filterable;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 
 public class ChannelList extends ListActivity
 {
@@ -103,6 +104,10 @@ public class ChannelList extends ListActivity
 
         ListAdapter adapter = new ChannelListAdapter(mCursor, this);
         setListAdapter(adapter);
+//        setListAdapter(new SimpleCursorAdapter(this,
+//          android.R.layout.simple_list_item_1, mCursor,
+//          new String[] { RSSReader.Channels.TITLE },
+//          new int[] { android.R.id.text1 }));
     }
 
     @Override
