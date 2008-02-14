@@ -19,7 +19,11 @@ package org.devtcg.rssreader.provider;
 
 import org.devtcg.rssreader.provider.RSSReaderProvider;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +43,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -48,10 +53,9 @@ public class RSSReaderProvider extends ContentProvider
 	
 	private static final String TAG = "RSSReaderProvider";
 	private static final String DATABASE_NAME = "rss_reader.db";
-	private static final int DATABASE_VERSION = 8;
+	private static final int DATABASE_VERSION = 9;
 
 	private static HashMap<String, String> CHANNEL_LIST_PROJECTION_MAP;
-	private static HashMap<String, String> CHANNEL_ICON_PROJECTION_MAP;
 	private static HashMap<String, String> POST_LIST_PROJECTION_MAP;
 
 	private static final int CHANNELS = 1;
@@ -144,13 +148,6 @@ public class RSSReaderProvider extends ContentProvider
 			qb.appendWhere("_id=" + url.getPathSegments().get(1));
 			break;
 
-		case CHANNELICON_ID:
-			ArrayList<ArrayList> list = new ArrayList<ArrayList>();
-			ArrayList<String> ofLists = new ArrayList<String>();
-			ofLists.add(getIconPath(Long.parseLong(url.getPathSegments().get(1))));
-			list.add(ofLists);
-			return new ArrayListCursor(new String[] { "_data" }, list);
-
 			/*
 		case POSTS:
 			qb.setTables("rssreader_post");
@@ -215,52 +212,79 @@ public class RSSReaderProvider extends ContentProvider
 		return getContext().getFileStreamPath("channel" + channelId + ".ico").getAbsolutePath();
 	}
 	
-	/* Stupid waste of resources.  Just trying to get used to this... */
-	private String createDefaultIcon(long channelId)
+	private void copyDefaultIcon(String path)
+	  throws FileNotFoundException, IOException
 	{
-		String icoName = "channel" + channelId + ".ico";
+		FileOutputStream out = new FileOutputStream(path);
 
-		FileOutputStream ico = null;
-		InputStream def = null;
-		String name = null;
+		InputStream ico =
+		  getContext().getResources().openRawResource(R.drawable.feedicon);
 
-		try
-		{
-			ico = 
-			  getContext().openFileOutput(icoName, Context.MODE_PRIVATE);
+		byte[] buf = new byte[1024];
+		int n;
 
-			def =
-			  getContext().getResources().openRawResource(R.drawable.feedicon);
-
-			byte[] buf = new byte[1024];
-			int n;
-			while ((n = def.read(buf)) != -1)
-				ico.write(buf, 0, n);
-
-			name = getIconPath(channelId);
-		}
-		catch (Exception e)
-		{
-			Log.d(TAG, Log.getStackTraceString(e));
-		}
-		finally
-		{
-			try {
-				if (ico != null)
-					ico.close();
-
-				if (def != null)
-					def.close();
-			}
-			catch (Exception e)
-			{
-				return null;
-			}
-		}
+		while ((n = ico.read(buf)) != -1)
+			out.write(buf, 0, n);
 		
-		return name;
+		ico.close();
+		
+		out.close();
 	}
 
+	public ParcelFileDescriptor openFile(Uri uri, String mode)
+	  throws FileNotFoundException
+	{
+		switch(URL_MATCHER.match(uri))
+		{
+		case CHANNELICON_ID:
+			long id = Long.valueOf(uri.getPathSegments().get(1));
+			String path = getIconPath(id);
+
+			/* XXX: This appears to be an Android bug: files created with
+			 * ParcelFileDescriptor.MODE_CREATE have mode 0, which is not
+			 * readable. */
+			if (mode.equals("rw") == true)
+			{
+				FileOutputStream foo = new FileOutputStream(path);
+				
+				try { foo.close(); }
+				catch (Exception e) { }
+			}
+
+			File file = new File(path);
+			int modeint;
+			
+			if (mode.equals("rw") == true)
+			{
+				modeint = ParcelFileDescriptor.MODE_READ_WRITE |
+				  ParcelFileDescriptor.MODE_TRUNCATE;
+			}
+			else
+			{
+				modeint = ParcelFileDescriptor.MODE_READ;
+				
+				if (file.exists() == false)
+				{
+					try
+					{
+						/* TODO: Find a way around this.  We should be able to
+						 * simply return an InputStream. */
+						copyDefaultIcon(path);
+					}
+					catch(IOException e)
+					{
+						Log.d(TAG, "Unable to create default feed icon", e);
+						return null;
+					}					
+				}
+			}
+			
+			return ParcelFileDescriptor.open(file, modeint);
+		default:
+			throw new IllegalArgumentException("Unknown URL " + uri);
+		}
+	}
+	
 	private long insertChannels(ContentValues values)
 	{
 		Resources r = Resources.getSystem();
@@ -271,25 +295,19 @@ public class RSSReaderProvider extends ContentProvider
 
 		long id = mDB.insert("rssreader_channel", "title", values);
 
-		/* TODO: We should let the column stay null and just fix-up a wrapper
-		 * to have a default URI. */
 		if (values.containsKey(RSSReader.Channels.ICON) == false)
 		{
-			String icoName = createDefaultIcon(id);
+			Uri iconUri;
 
-			if (icoName != null)
-			{
-				ContentValues update = new ContentValues();
-				
-				Uri icoUri = RSSReader.Channels.CONTENT_URI
-				  .buildUpon()
-				  .appendPath(String.valueOf(id))
-				  .appendPath("icon")
-				  .build();
-				
-				update.put("icon", icoUri.toString());
-				mDB.update("rssreader_channel", update, "_id=" + id, null);
-			}
+			iconUri = RSSReader.Channels.CONTENT_URI.buildUpon()
+			  .appendPath(String.valueOf(id))
+			  .appendPath("icon")
+			  .build();
+
+			/* LAME! */
+			ContentValues update = new ContentValues();
+			update.put(RSSReader.Channels.ICON, iconUri.toString());
+			mDB.update("rssreader_channel", update, "_id=" + id, null);
 		}
 
 		return id;
@@ -425,9 +443,6 @@ public class RSSReaderProvider extends ContentProvider
 		CHANNEL_LIST_PROJECTION_MAP.put(RSSReader.Channels.URL, "url");
 		CHANNEL_LIST_PROJECTION_MAP.put(RSSReader.Channels.ICON, "icon");
 		CHANNEL_LIST_PROJECTION_MAP.put(RSSReader.Channels.LOGO, "logo");
-		
-		CHANNEL_ICON_PROJECTION_MAP = new HashMap<String, String>();
-		CHANNEL_ICON_PROJECTION_MAP.put("_data", "icon_path");
 		
 		POST_LIST_PROJECTION_MAP = new HashMap<String, String>();
 		POST_LIST_PROJECTION_MAP.put(RSSReader.Posts._ID, "_id");
