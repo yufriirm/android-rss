@@ -22,18 +22,18 @@
 
 	<!-- Holds the logo and the channel text.  The ImageView will be shown
 	     over the TextView, leaving the TextView as a simple fallback. -->
-	<view class="org.devtcg.rssreader.view.ChannelHead" id="@+id/postListHead"
+	<view class="org.devtcg.rssreader.view.ChannelHead" android:id="@+id/postListHead"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		/>
 
-	<ListView id="@android:id/list"
+	<ListView android:id="@android:id/list"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
 		android:layout_weight="1"
 		/>
 
-	<TextView id="@android:id/empty"
+	<TextView android:id="@android:id/empty"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
 		android:text="No posts.  Are you sure this feed is still valid?"

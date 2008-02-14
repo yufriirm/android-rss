@@ -89,7 +89,7 @@ public class PostListRow extends ViewGroup
 	}
 
 	@Override
-	protected void onLayout(boolean changed, int wl, int wt, int l, int t, int r, int b)
+	protected void onLayout(boolean changed, int l, int t, int r, int b)
 	{
 		int subjw = mSubject.getMeasuredWidth();
 		int subjh = mSubject.getMeasuredHeight();
@@ -98,9 +98,8 @@ public class PostListRow extends ViewGroup
 		int selfw = getMeasuredWidth();
 		int selfh = getMeasuredHeight();
 
-		mSubject.layout(mWindowLeft, mWindowTop, 0, 0, subjw, subjh);
-		mDate.layout(mWindowLeft, mWindowTop + selfh - (dateh + 4),
-		  selfw - datew, selfh - (dateh + 4), selfw, selfh - 4);
+		mSubject.layout(0, 0, subjw, subjh);
+		mDate.layout(selfw - datew, selfh - (dateh + 4), selfw, selfh - 4);
 	}
 
 	@Override

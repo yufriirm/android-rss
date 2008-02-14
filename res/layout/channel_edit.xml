@@ -27,7 +27,7 @@
 	    android:text="Feed URL:"
 	    />
 
-	<EditText id="@+id/channelEditURL"
+	<EditText android:id="@+id/channelEditURL"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:singleLine="true"
@@ -39,7 +39,7 @@
 		android:text="Feed name:"
 		/>
 
-	<EditText id="@+id/channelEditName"
+	<EditText android:id="@+id/channelEditName"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:singleLine="true"
@@ -57,14 +57,14 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content">
 
-		<ImageView id="@+id/channelEditIcon"
+		<ImageView android:id="@+id/channelEditIcon"
 			android:layout_width="wrap_content"
 			android:layout_height="fill_parent"
 			android:gravity="center_vertical"
 			android:padding="3dip"
 			/>
 
-		<Button id="@+id/channelEditIconDownload"
+		<Button android:id="@+id/channelEditIconDownload"
 			android:layout_width="wrap_content"
 			android:layout_height="fill_parent"
 			android:text="Refresh"
@@ -74,13 +74,13 @@
   -->
 
 <!--		
-	<CheckBox id="@+id/download_name"
+	<CheckBox android:id="@+id/download_name"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:text="Determine name from feed"
 		/>
 		
-	<CheckBox id="@+id/download_icon"
+	<CheckBox android:id="@+id/download_icon"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:text="Attempt to download feed icon"
@@ -93,7 +93,7 @@
 		android:paddingTop="8dip"
 		android:gravity="center_horizontal">
 
-		<Button id="@+id/channelEditSave"
+		<Button android:id="@+id/channelEditSave"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="Save"

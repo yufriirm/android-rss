@@ -27,7 +27,7 @@
 	    android:text="Enter RSS URL:"
 	    />
 
-	<EditText id="@+id/url"
+	<EditText android:id="@+id/url"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:text="http://"
@@ -41,19 +41,19 @@
 		android:text="Enter feed name:"
 		/>
 		
-	<EditText id="@+id/name"
+	<EditText android:id="@+id/name"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:singleLine="true"
 		/>
 		
-	<CheckBox id="@+id/download_name"
+	<CheckBox android:id="@+id/download_name"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:text="Determine name from feed"
 		/>
 		
-	<CheckBox id="@+id/download_icon"
+	<CheckBox android:id="@+id/download_icon"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:text="Attempt to download feed icon"
@@ -66,7 +66,7 @@
 		android:paddingTop="8dip"
 		android:gravity="center_horizontal">
 		
-		<Button id="@+id/add"
+		<Button android:id="@+id/add"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="Add"

@@ -21,7 +21,7 @@ import org.devtcg.rssreader.provider.RSSReader;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.net.ContentURI;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,7 +33,7 @@ public class ChannelEdit extends Activity
 	private TextView mURLText;
 	private TextView mTitleText;
 	
-	private ContentURI mURI;
+	private Uri mURI;
 	
 	private Cursor mCursor;
 	

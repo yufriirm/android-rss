@@ -1,5 +1,5 @@
 /*
- * $Id: ChannelAdd.java 78 2007-12-06 01:02:59Z jasta00 $
+ * $Id:ChannelAdd.java 87 2007-12-10 06:24:56Z jasta00 $
  *
  * Copyright (C) 2007 Josh Guilfoyle <jasta@devtcg.org>
  *
@@ -26,7 +26,8 @@ import org.devtcg.rssreader.provider.RSSReader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.net.ContentURI;
+import android.content.ContentUris;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -80,17 +81,7 @@ public class ChannelAdd extends Activity
 	@Override
 	protected void onStart()
 	{
-		super.onStart();
-		
-		/* Position cursor at the end of the widget; seems easier to use
-		 * that way. */
-		Bundle state = mURLText.saveState();
-
-		Integer endpos = mURLText.length();
-		state.putInteger("sel-start", endpos);
-		state.putInteger("sel-end", endpos);
-		
-		mURLText.restoreState(state);
+		super.onStart();		
 	}
 	
 	private static URL getDefaultFavicon(String rssurl)
@@ -140,7 +131,7 @@ public class ChannelAdd extends Activity
 			    		{
 			    			mBusy.dismiss();
 			    			
-			    			ContentURI uri = RSSReader.Channels.CONTENT_URI.addId(id);
+			    			Uri uri = ContentUris.withAppendedId(RSSReader.Channels.CONTENT_URI, id);
 			    			setResult(RESULT_OK, uri.toString());
 			    			finish();
 			    		}
@@ -159,7 +150,8 @@ public class ChannelAdd extends Activity
 		    				String errstr = ((errmsgFull != null) ? errmsgFull : errmsg);
 
 		    				AlertDialog.show(ChannelAdd.this,
-		    				  "Feed error", "An error was encountered while accessing the feed: " + errstr,
+		    				  "Feed error", R.drawable.star_big_on, 
+		    				  "An error was encountered while accessing the feed: " + errstr,
 		    				  "OK", true);
 		    			}
 		    		});

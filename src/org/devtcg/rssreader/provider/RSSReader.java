@@ -16,7 +16,7 @@
 
 package org.devtcg.rssreader.provider;
 
-import android.net.ContentURI;
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 public final class RSSReader
@@ -27,8 +27,8 @@ public final class RSSReader
 	{
 		/* URI for accessing a specific channel.  See Posts.CONTENT_URI_LIST
 		 * for how to "view" the channel posts. */
-		public static final ContentURI CONTENT_URI = 
-		  ContentURI.create("content://" + AUTHORITY + "/channels");
+		public static final Uri CONTENT_URI = 
+		  Uri.parse("content://" + AUTHORITY + "/channels");
 		
 		public static final String DEFAULT_SORT_ORDER = "title ASC";
 		
@@ -49,12 +49,12 @@ public final class RSSReader
 	public interface Posts extends BaseColumns
 	{
 		/* URI for accessing a specific post. */
-		public static final ContentURI CONTENT_URI = 
-		  ContentURI.create("content://" + AUTHORITY + "/posts");
+		public static final Uri CONTENT_URI = 
+		  Uri.parse("content://" + AUTHORITY + "/posts");
 		
 		/* URI for accessing a list of posts on a particular channel. */
-		public static final ContentURI CONTENT_URI_LIST =
-		  ContentURI.create("content://" + AUTHORITY + "/postlist");
+		public static final Uri CONTENT_URI_LIST =
+		  Uri.parse("content://" + AUTHORITY + "/postlist");
 		
 		public static final String DEFAULT_SORT_ORDER = "posted_on DESC";
 		
