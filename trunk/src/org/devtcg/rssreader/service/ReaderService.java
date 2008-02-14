@@ -19,6 +19,7 @@ package org.devtcg.rssreader.service;
 import org.devtcg.rssreader.service.IReaderService;
 
 import android.app.Service;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
@@ -79,7 +80,7 @@ public class ReaderService extends Service implements Runnable
 	}
 	
 	@Override
-	public IBinder getBinder()
+	public IBinder onBind(Intent intent)
 	{
 		return mBinder;
 	}

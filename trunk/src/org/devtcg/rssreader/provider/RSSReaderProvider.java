@@ -19,7 +19,6 @@ package org.devtcg.rssreader.provider;
 
 import org.devtcg.rssreader.provider.RSSReaderProvider;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -28,17 +27,18 @@ import java.util.HashMap;
 import org.devtcg.rssreader.R;
 
 import android.content.ContentProvider;
-import android.content.ContentProviderDatabaseHelper;
-import android.content.ContentURIParser;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.content.ContentUris;
+import android.content.UriMatcher;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.QueryBuilder;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.content.Resources;
 import android.database.ArrayListCursor;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.ContentURI;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -61,9 +61,9 @@ public class RSSReaderProvider extends ContentProvider
 	private static final int CHANNEL_POSTS = 5;
 	private static final int CHANNELICON_ID = 6;
 
-	private static final ContentURIParser URL_MATCHER;
+	private static final UriMatcher URL_MATCHER;
 
-	private static class DatabaseHelper extends ContentProviderDatabaseHelper
+	private static class DatabaseHelper extends SQLiteOpenHelper
 	{
 		protected void onCreateChannels(SQLiteDatabase db)
 		{
@@ -124,10 +124,10 @@ public class RSSReaderProvider extends ContentProvider
 	}
 	
 	@Override
-	public Cursor query(ContentURI url, String[] projection, String selection,
-			String[] selectionArgs, String groupBy, String having, String sort)
+	public Cursor query(Uri url, String[] projection, String selection,
+	  String[] selectionArgs, String sort)
 	{
-		QueryBuilder qb = new QueryBuilder();
+		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 		
 		String defaultSort = null;
 		
@@ -141,13 +141,13 @@ public class RSSReaderProvider extends ContentProvider
 
 		case CHANNEL_ID:
 			qb.setTables("rssreader_channel");
-			qb.appendWhere("_id=" + url.getPathSegment(1));
+			qb.appendWhere("_id=" + url.getPathSegments().get(1));
 			break;
 
 		case CHANNELICON_ID:
 			ArrayList<ArrayList> list = new ArrayList<ArrayList>();
 			ArrayList<String> ofLists = new ArrayList<String>();
-			ofLists.add(getIconPath(Long.parseLong(url.getPathSegment(1))));
+			ofLists.add(getIconPath(Long.parseLong(url.getPathSegments().get(1))));
 			list.add(ofLists);
 			return new ArrayListCursor(new String[] { "_data" }, list);
 
@@ -160,14 +160,14 @@ public class RSSReaderProvider extends ContentProvider
 			*/
 		case CHANNEL_POSTS:
 			qb.setTables("rssreader_post");
-			qb.appendWhere("channel_id=" + url.getPathSegment(1));
+			qb.appendWhere("channel_id=" + url.getPathSegments().get(1));
 			qb.setProjectionMap(POST_LIST_PROJECTION_MAP);
 			defaultSort = RSSReader.Posts.DEFAULT_SORT_ORDER;
 			break;
 			
 		case POST_ID:
 			qb.setTables("rssreader_post");
-			qb.appendWhere("_id=" + url.getPathSegment(1));
+			qb.appendWhere("_id=" + url.getPathSegments().get(1));
 			break;
 			
 		default:
@@ -182,7 +182,7 @@ public class RSSReaderProvider extends ContentProvider
 			orderBy = sort;
 
 		Cursor c = qb.query(mDB, projection, selection, selectionArgs,
-				groupBy, having, orderBy);
+				null, null, orderBy);
 
 		c.setNotificationUri(getContext().getContentResolver(), url);
 		
@@ -190,7 +190,7 @@ public class RSSReaderProvider extends ContentProvider
 	}
 
 	@Override
-	public String getType(ContentURI url)
+	public String getType(Uri url)
 	{
 		switch(URL_MATCHER.match(url))
 		{
@@ -212,11 +212,7 @@ public class RSSReaderProvider extends ContentProvider
 	
 	private String getIconPath(long channelId)
 	{
-		try {
-			return getContext().getFileStreamPath("channel" + channelId + ".ico").getAbsolutePath();
-		} catch (FileNotFoundException e) {
-			return null;
-		}
+		return getContext().getFileStreamPath("channel" + channelId + ".ico").getAbsolutePath();
 	}
 	
 	/* Stupid waste of resources.  Just trying to get used to this... */
@@ -284,7 +280,14 @@ public class RSSReaderProvider extends ContentProvider
 			if (icoName != null)
 			{
 				ContentValues update = new ContentValues();
-				update.put("icon", RSSReader.Channels.CONTENT_URI.addId(id).addPath("icon").toString());
+				
+				Uri icoUri = RSSReader.Channels.CONTENT_URI
+				  .buildUpon()
+				  .appendPath(String.valueOf(id))
+				  .appendPath("icon")
+				  .build();
+				
+				update.put("icon", icoUri.toString());
 				mDB.update("rssreader_channel", update, "_id=" + id, null);
 			}
 		}
@@ -299,7 +302,7 @@ public class RSSReaderProvider extends ContentProvider
 	}
 
 	@Override
-	public ContentURI insert(ContentURI url, ContentValues initialValues)
+	public Uri insert(Uri url, ContentValues initialValues)
 	{
 		long rowID;
 		ContentValues values;
@@ -309,17 +312,17 @@ public class RSSReaderProvider extends ContentProvider
 		else
 			values = new ContentValues();
 		
-		ContentURI uri;
+		Uri uri;
 		
 		if (URL_MATCHER.match(url) == CHANNELS)
 		{
 			rowID = insertChannels(values);
-			uri = RSSReader.Channels.CONTENT_URI.addId(rowID);
+			uri = ContentUris.withAppendedId(RSSReader.Channels.CONTENT_URI, rowID);
 		}
 		else if (URL_MATCHER.match(url) == POSTS)
 		{
 			rowID = insertPosts(values);
-			uri = RSSReader.Posts.CONTENT_URI.addId(rowID);
+			uri = ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI, rowID);
 		}
 		else
 		{
@@ -337,7 +340,7 @@ public class RSSReaderProvider extends ContentProvider
 	}
 	
 	@Override
-	public int delete(ContentURI url, String where, String[] whereArgs)
+	public int delete(Uri url, String where, String[] whereArgs)
 	{
 		int count;
 		String myWhere;
@@ -349,7 +352,7 @@ public class RSSReaderProvider extends ContentProvider
 			break;
 			
 		case CHANNEL_ID:
-			myWhere = "_id=" + url.getPathSegment(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
+			myWhere = "_id=" + url.getPathSegments().get(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
 			count = mDB.delete("rssreader_channel", myWhere, whereArgs);
 			break;
 			
@@ -358,7 +361,7 @@ public class RSSReaderProvider extends ContentProvider
 			break;
 			
 		case POST_ID:
-			myWhere = "_id=" + url.getPathSegment(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
+			myWhere = "_id=" + url.getPathSegments().get(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
 			count = mDB.delete("rssreader_post", myWhere, whereArgs);
 			break;
 			
@@ -371,7 +374,7 @@ public class RSSReaderProvider extends ContentProvider
 	}
 	
 	@Override
-	public int update(ContentURI url, ContentValues values, String where, String[] whereArgs)
+	public int update(Uri url, ContentValues values, String where, String[] whereArgs)
 	{
 		int count;
 		String myWhere;
@@ -383,7 +386,7 @@ public class RSSReaderProvider extends ContentProvider
 			break;
 			
 		case CHANNEL_ID:
-			myWhere = "_id=" + url.getPathSegment(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
+			myWhere = "_id=" + url.getPathSegments().get(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
 			count = mDB.update("rssreader_channel", values, myWhere, whereArgs);
 			break;
 			
@@ -392,7 +395,7 @@ public class RSSReaderProvider extends ContentProvider
 			break;
 			
 		case POST_ID:
-			myWhere = "_id=" + url.getPathSegment(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
+			myWhere = "_id=" + url.getPathSegments().get(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
 			count = mDB.update("rssreader_post", values, myWhere, whereArgs);
 			break;
 			
@@ -406,7 +409,7 @@ public class RSSReaderProvider extends ContentProvider
 
 	static
 	{
-		URL_MATCHER = new ContentURIParser(ContentURIParser.NO_MATCH);
+		URL_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 		URL_MATCHER.addURI(RSSReader.AUTHORITY, "channels", CHANNELS);
 		URL_MATCHER.addURI(RSSReader.AUTHORITY, "channels/#", CHANNEL_ID);
 		URL_MATCHER.addURI(RSSReader.AUTHORITY, "channels/#/icon", CHANNELICON_ID);

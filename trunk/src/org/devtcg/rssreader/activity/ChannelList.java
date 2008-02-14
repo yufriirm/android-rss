@@ -28,7 +28,8 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.ContentURI;
+import android.net.Uri;
+import android.content.ContentUris;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -139,7 +140,7 @@ public class ChannelList extends ListActivity
     	super.onCreateOptionsMenu(menu);
 
     	menu.add(0, INSERT_ID, "New Channel").
-    	  setShortcut(KeyEvent.KEYCODE_3, 0, KeyEvent.KEYCODE_A);
+    	  setShortcut('3', 'a');
 
     	return true;
     }
@@ -156,26 +157,26 @@ public class ChannelList extends ListActivity
     	 * available on each channel listed. */
     	if (haveItems)
     	{
-            ContentURI uri = getIntent().getData().addId(getSelectionRowID());
-
-    		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
+//          ContentURI uri = getIntent().getData().addId(getSelectionRowID());
+//
+//    		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
 
     		menu.add(Menu.SELECTED_ALTERNATIVE, REFRESH_ALL_ID, "Refresh All");
 
-    		menu.add(Menu.SELECTED_ALTERNATIVE, REFRESH_ID, "Refresh Channel").
-		  	  setShortcut(0, 0, KeyEvent.KEYCODE_R);
+//    		menu.add(Menu.SELECTED_ALTERNATIVE, REFRESH_ID, "Refresh Channel").
+//		  	  setShortcut(0, 0, KeyEvent.KEYCODE_R);
 
-    		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
+//    		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
 
-            Item edit = menu.add(Menu.SELECTED_ALTERNATIVE, EDIT_ID, "Edit Channel");
-            edit.setIntent(new Intent(Intent.EDIT_ACTION, uri));
-            edit.setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_E);
+//          Item edit = menu.add(Menu.SELECTED_ALTERNATIVE, EDIT_ID, "Edit Channel");
+//          edit.setIntent(new Intent(Intent.EDIT_ACTION, uri));
+//          edit.setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_E);
 
-            menu.add(Menu.SELECTED_ALTERNATIVE, DELETE_ID, "Delete Channel").
-    		  setShortcut(KeyEvent.KEYCODE_2, 0, KeyEvent.KEYCODE_D);
-
-    		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
-
+//			menu.add(Menu.SELECTED_ALTERNATIVE, DELETE_ID, "Delete Channel").
+//			setShortcut(KeyEvent.KEYCODE_2, 0, KeyEvent.KEYCODE_D);
+//
+//    		menu.addSeparator(Menu.SELECTED_ALTERNATIVE, 0);
+//
     		menu.setDefaultItem(INSERT_ID);
     	}
 
@@ -190,12 +191,16 @@ public class ChannelList extends ListActivity
     	if (action.equals(Intent.PICK_ACTION) ||
     	    action.equals(Intent.GET_CONTENT_ACTION))
     	{
-    		ContentURI uri = getIntent().getData().addId(getSelectionRowID());
+    		Uri uri =
+    		  ContentUris.withAppendedId(getIntent().getData(), id);
+    		
     		setResult(RESULT_OK, uri.toString());
     	}
     	else
     	{
-    		ContentURI uri = RSSReader.Posts.CONTENT_URI_LIST.addId(getSelectionRowID());
+    		Uri uri = 
+    		  ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI_LIST, id);
+    		
     		startActivity(new Intent(Intent.VIEW_ACTION, uri));
     	}
     }
@@ -209,14 +214,14 @@ public class ChannelList extends ListActivity
     		startActivity(new Intent(Intent.INSERT_ACTION, getIntent().getData()));
     		return true;
 
-    	case DELETE_ID:
-    		deleteChannel();
-    		return true;
-
-    	case REFRESH_ID:
-        	mCursor.moveTo(getSelection());
-    		refreshChannel();
-    		return true;
+//    	case DELETE_ID:
+//    		deleteChannel();
+//    		return true;
+//
+//    	case REFRESH_ID:
+//        	mCursor.moveTo(getSelection());
+//    		refreshChannel();
+//    		return true;
 
     	case REFRESH_ALL_ID:
     		refreshAllChannels();
@@ -226,24 +231,24 @@ public class ChannelList extends ListActivity
     	return super.onOptionsItemSelected(item);
     }
 
-    private final void deleteChannel()
-    {
-    	long channelId = getSelectionRowID();
-
-//    	Thread refresh;
+//    private final void deleteChannel()
+//    {
+//    	long channelId = getSelectionRowID();
 //
-//    	if (mRefreshThreads != null &&
-//    	    (refresh = mRefreshThreads.remove(channelId)) != null)
-//    	{
-//    		/* TODO: Stop the thread. */
-//    	}
-
-		/* Delete related posts. */
-		getContentResolver().delete(RSSReader.Posts.CONTENT_URI,
-    	  "channel_id=?", new String[] { String.valueOf(channelId) });
-
-		mCursor.deleteRow();
-    }
+////    	Thread refresh;
+////
+////    	if (mRefreshThreads != null &&
+////    	    (refresh = mRefreshThreads.remove(channelId)) != null)
+////    	{
+////    		/* TODO: Stop the thread. */
+////    	}
+//
+//		/* Delete related posts. */
+//		getContentResolver().delete(RSSReader.Posts.CONTENT_URI,
+//    	  "channel_id=?", new String[] { String.valueOf(channelId) });
+//
+//		mCursor.deleteRow();
+//    }
 
     private final void refreshAllChannels()
     {

@@ -27,7 +27,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.net.ContentURI;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.widget.ImageView;
@@ -121,9 +121,7 @@ public class ChannelHead extends LinearLayout
 		
 		if (iconData != null)
 		{
-			try {
-				mIcon.setImageURI(new ContentURI(iconData));
-			} catch (URISyntaxException e) { }
+			mIcon.setImageURI(Uri.parse(iconData));
 		}
 		
 		if (mLogoText == null)

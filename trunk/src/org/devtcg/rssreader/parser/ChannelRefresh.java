@@ -40,9 +40,10 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.net.ContentURI;
+import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 
@@ -139,9 +140,12 @@ public class ChannelRefresh extends DefaultHandler
 		OutputStream ico = null;
 
 		boolean r = false;
-
-		ContentURI feedUri = RSSReader.Channels.CONTENT_URI.addId(id);
-		ContentURI iconUri = feedUri.addPath("icon");
+		
+		Uri iconUri = RSSReader.Channels.CONTENT_URI
+			.buildUpon()
+			.appendPath(String.valueOf(id))
+			.appendPath("icon")
+			.build();
 
 		try
 		{
@@ -226,8 +230,8 @@ public class ChannelRefresh extends DefaultHandler
 				String[] dupProj =
 				  new String[] { RSSReader.Posts._ID };
 
-				ContentURI listURI =
-				  RSSReader.Posts.CONTENT_URI_LIST.addId(mID);
+				Uri listURI =
+				  ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI_LIST, mID);
 
 				Cursor dup = mContent.query(listURI,
 					dupProj, "title = ? AND url = ?",
@@ -264,10 +268,10 @@ public class ChannelRefresh extends DefaultHandler
 			values.put(RSSReader.Channels.TITLE, new String(ch, start, length));
 			values.put(RSSReader.Channels.URL, mRSSURL);
 
-			ContentURI added =
+			Uri added =
 			  mContent.insert(RSSReader.Channels.CONTENT_URI, values);
 
-			mID = Long.parseLong(added.getPathSegment(1));
+			mID = Long.parseLong(added.getPathSegments().get(1));
 
 			/* There's no reason we need to do this ever, but we'll just be
 			 * good about removing this awful hack from runtime data. */
@@ -334,4 +338,3 @@ public class ChannelRefresh extends DefaultHandler
 		}
 	}
 }
-

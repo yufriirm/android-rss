@@ -21,10 +21,11 @@ import java.net.URISyntaxException;
 import org.devtcg.rssreader.provider.RSSReader;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Typeface;
-import android.net.ContentURI;
+import android.net.Uri;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.ImageView;
@@ -105,7 +106,7 @@ public class ChannelListRow extends RelativeLayout
 
 		/* Determine number of unread posts. */
 		Cursor unread = 
-		  content.query(RSSReader.Posts.CONTENT_URI_LIST.addId(channelId), 
+		  content.query(ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI_LIST, channelId), 
 		    new String[] { RSSReader.Posts._ID }, "read=0", null, null);
 
 		Typeface tf;
@@ -121,11 +122,7 @@ public class ChannelListRow extends RelativeLayout
 		String icon = 
 		  cursor.getString(cursor.getColumnIndex(RSSReader.Channels.ICON));
 		
-		try {
-			mIcon.setImageURI(new ContentURI(icon));
-		} catch (URISyntaxException e) {
-			Log.d("ChannelListRow", "Invalid URI?  Lies (" + icon + ")!");
-		}
+		mIcon.setImageURI(Uri.parse(icon));
 
 		mName.setTypeface(tf);
 		mName.setText(cursor, cursor.getColumnIndex(RSSReader.Channels.TITLE));
@@ -158,7 +155,7 @@ public class ChannelListRow extends RelativeLayout
 	public void finishRefresh(long channelId)
 	{
 		Cursor cursor = getContext().getContentResolver().query
-		 (RSSReader.Channels.CONTENT_URI.addId(channelId),
+		 (ContentUris.withAppendedId(RSSReader.Channels.CONTENT_URI, channelId),
 		  new String[] { RSSReader.Channels._ID, RSSReader.Channels.TITLE, RSSReader.Channels.ICON },
 		  null, null, null);
 		

@@ -23,9 +23,10 @@ import org.devtcg.rssreader.view.ChannelHead;
 
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.ContentURI;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -62,7 +63,7 @@ public class PostView extends Activity
 //		PostScrollView scroll = (PostScrollView)findViewById(R.id.postViewScroll);
 //		scroll.setChannelHead(head);
 		
-		ContentURI uri = getIntent().getData();
+		Uri uri = getIntent().getData();
 
 		mCursor = managedQuery(uri, PROJECTION, null, null, null);
 
@@ -70,7 +71,7 @@ public class PostView extends Activity
 			finish();
 
 		mChannelID = mCursor.getLong(mCursor.getColumnIndex(RSSReader.Posts.CHANNEL_ID));
-		mPostID = Long.parseLong(uri.getPathSegment(1));
+		mPostID = Long.parseLong(uri.getPathSegments().get(1));
 
 		/* TODO: Should this be in onStart() or onResume() or something?  */
 		initWithData();
@@ -93,7 +94,7 @@ public class PostView extends Activity
 	{	
 		ContentResolver cr = getContentResolver();
 
-		Cursor cChannel = cr.query(RSSReader.Channels.CONTENT_URI.addId(mChannelID),
+		Cursor cChannel = cr.query(ContentUris.withAppendedId(RSSReader.Channels.CONTENT_URI, mChannelID),
 		  new String[] { RSSReader.Channels.ICON, RSSReader.Channels.LOGO, RSSReader.Channels.TITLE }, null, null, null);
 
 		assert(cChannel.count() == 1);
@@ -171,7 +172,7 @@ public class PostView extends Activity
 		if (mNextPostID < 0 || mPrevPostID < 0)
 		{
 	    	Cursor cPostList = getContentResolver().query
-	    	 (RSSReader.Posts.CONTENT_URI_LIST.addId(mChannelID),
+	    	 (ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI_LIST, mChannelID),
 	    	  new String[] { RSSReader.Posts._ID }, null, null, null);
 
 	    	/* TODO: This is super lame; we need to use SQLite queries to
@@ -218,13 +219,13 @@ public class PostView extends Activity
 		if (mNextPostID >= 0)
 		{
 			menu.add(0, NEXT_POST_ID, "Newer Post").
-  	  	  	  setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_LEFT_BRACKET);
+  	  	  	  setShortcut('1', '[');
 		}
     	
 		if (mPrevPostID >= 0)
 		{
 			menu.add(0, PREV_POST_ID, "Older Post").
-			  setShortcut(KeyEvent.KEYCODE_3, 0, KeyEvent.KEYCODE_RIGHT_BRACKET);
+			  setShortcut('3', ']');
 			
 			menu.setDefaultItem(PREV_POST_ID);
 		}
@@ -235,7 +236,7 @@ public class PostView extends Activity
 	private void moveTo(long id)
 	{
 		Intent intent = new Intent(Intent.VIEW_ACTION,
-		  RSSReader.Posts.CONTENT_URI.addId(id));
+		  ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI, id));
 		
 		startActivity(intent);
 		

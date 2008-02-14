@@ -24,10 +24,11 @@ import org.devtcg.rssreader.view.PostListRow;
 
 import android.app.ListActivity;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.ContentURI;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -61,9 +62,9 @@ public class PostList extends ListActivity
 		
 		setContentView(R.layout.post_list);
 
-		ContentURI uri = getIntent().getData();
+		Uri uri = getIntent().getData();
 		mCursor = managedQuery(uri, PROJECTION, null, null);
-		mID = Long.parseLong(uri.getPathSegment(1));
+		mID = Long.parseLong(uri.getPathSegments().get(1));
 
 		ListAdapter adapter = new PostListAdapter(mCursor, this);
         setListAdapter(adapter);
@@ -73,10 +74,10 @@ public class PostList extends ListActivity
 
 	private void initWithData()
 	{
-		long channelId = Long.parseLong(getIntent().getData().getPathSegment(1));
+		long channelId = Long.parseLong(getIntent().getData().getPathSegments().get(1));
 
 		ContentResolver cr = getContentResolver();		
-		Cursor cChannel = cr.query(RSSReader.Channels.CONTENT_URI.addId(channelId),
+		Cursor cChannel = cr.query(ContentUris.withAppendedId(RSSReader.Channels.CONTENT_URI, channelId),
 		  new String[] { RSSReader.Channels.LOGO, RSSReader.Channels.ICON, RSSReader.Channels.TITLE }, null, null, null);
 
 		assert(cChannel.count() == 1);
@@ -92,7 +93,8 @@ public class PostList extends ListActivity
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id)
     {
-		ContentURI uri = RSSReader.Posts.CONTENT_URI.addId(getSelectionRowID());
+		Uri uri = 
+		  ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI, id);
     	String action = getIntent().getAction();
     	
     	if (action.equals(Intent.PICK_ACTION) ||
@@ -116,13 +118,13 @@ public class PostList extends ListActivity
 		if (mPrevID >= 0)
 		{
 			menu.add(0, PREV_ID, "Previous Channel").
-  	  	  	  setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_LEFT_BRACKET);
+  	  	  	  setShortcut('1', '[');
 		}
 
 		if (mNextID >= 0)
 		{
 			menu.add(0, NEXT_ID, "Next Channel").
-			  setShortcut(KeyEvent.KEYCODE_3, 0, KeyEvent.KEYCODE_RIGHT_BRACKET);
+			  setShortcut('3', ']');
 
 			menu.setDefaultItem(PREV_ID);
 		}
@@ -188,8 +190,9 @@ public class PostList extends ListActivity
     
     private void moveTo(long id)
     {
-    	ContentURI uri = RSSReader.Posts.CONTENT_URI_LIST;
-		Intent intent = new Intent(Intent.VIEW_ACTION, uri.addId(id));
+    	Uri uri = 
+    	  ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI_LIST, id);
+		Intent intent = new Intent(Intent.VIEW_ACTION, uri);
 		startActivity(intent);
 		
 		/* Assume that user would do not want to keep the [now read]
