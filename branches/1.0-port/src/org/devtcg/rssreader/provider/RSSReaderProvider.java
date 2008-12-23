@@ -342,6 +342,7 @@ public class RSSReaderProvider extends ContentProvider
 		
 		if (URL_MATCHER.match(url) == CHANNELS)
 		{
+			Log.d("RSS Provider", initialValues.getAsString("title"));
 			rowID = insertChannels(db, values);
 			uri = ContentUris.withAppendedId(RSSReader.Channels.CONTENT_URI, rowID);
 		}
