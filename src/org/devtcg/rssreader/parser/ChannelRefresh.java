@@ -252,8 +252,8 @@ public class ChannelRefresh extends DefaultHandler
 					values.put(RSSReader.Posts.DATE, mPostBuf.getDate());
 					values.put(RSSReader.Posts.BODY, mPostBuf.desc);
 
-					Log.d("ChannelRefresh", "Inserting new channel: " + mID);
-					mContent.insert(RSSReader.Posts.CONTENT_URI, values);
+					Uri added = mContent.insert(RSSReader.Posts.CONTENT_URI, values);
+					Log.d("ChannelRefresh", "Inserting new post: " + added.toString());
 				}
 
 				dup.close();

@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
@@ -67,10 +68,11 @@ public class PostList extends ListActivity
 		mCursor = managedQuery(uri, PROJECTION, null, null, null);
 		mID = Long.parseLong(uri.getPathSegments().get(1));
 
+		Log.d("PostList", "The current instance id is " + mID);
 		ListAdapter adapter = new PostListAdapter(this, mCursor);
         setListAdapter(adapter);
         
-        initWithData();
+        //initWithData();
 	}
 
 	private void initWithData()
@@ -78,7 +80,7 @@ public class PostList extends ListActivity
 		long channelId = Long.parseLong(getIntent().getData().getPathSegments().get(1));
 
 		ContentResolver cr = getContentResolver();		
-		Cursor cChannel = cr.query(ContentUris.withAppendedId(RSSReader.Channels.CONTENT_URI, channelId),
+		Cursor cChannel = cr.query(ContentUris.withAppendedId(RSSReader.Channels.CONTENT_URI, mID),
 		  new String[] { RSSReader.Channels.LOGO, RSSReader.Channels.ICON, RSSReader.Channels.TITLE }, null, null, null);
 
 		assert(cChannel.getCount() == 1);
