@@ -70,7 +70,7 @@ public class ChannelList extends ListActivity
       RSSReader.Channels.TITLE, RSSReader.Channels.URL };
 
     @Override
-    protected void onCreate(Bundle icicle)
+    public void onCreate(Bundle icicle)
     {
         super.onCreate(icicle);
 
@@ -107,7 +107,7 @@ public class ChannelList extends ListActivity
     }
 
     @Override
-    protected void onStop()
+    public void onStop()
     {
     	super.onStop();
 
