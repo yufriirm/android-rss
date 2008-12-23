@@ -104,7 +104,7 @@ public class ChannelHead extends LinearLayout
 	public void setLogo(String channelName, String iconData, String logoData)
 	{
 		/* TODO */
-		assert(logoData == null);
+		//assert(logoData == null);
 		
 		if (mIcon == null)
 		{

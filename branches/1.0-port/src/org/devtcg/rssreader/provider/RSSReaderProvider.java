@@ -50,7 +50,7 @@ public class RSSReaderProvider extends ContentProvider
 {	
 	private static final String TAG = "RSSReaderProvider";
 	private static final String DATABASE_NAME = "rss_reader.db";
-	private static final int DATABASE_VERSION = 9;
+	private static final int DATABASE_VERSION = 10;
 
 	private DatabaseHelper mHelper;
 	
