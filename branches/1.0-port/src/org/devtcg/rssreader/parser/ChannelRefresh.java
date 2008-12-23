@@ -239,7 +239,7 @@ public class ChannelRefresh extends DefaultHandler
 
 				Log.d(TAG, "Post: " + mPostBuf.title);
 
-				if (dup.count() == 0)
+				if (dup.getCount() == 0)
 				{
 					ContentValues values = new ContentValues();
 
