@@ -37,8 +37,7 @@ import android.content.UriMatcher;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.content.Resources;
-import android.database.ArrayListCursor;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -55,6 +54,8 @@ public class RSSReaderProvider extends ContentProvider
 	private static final String DATABASE_NAME = "rss_reader.db";
 	private static final int DATABASE_VERSION = 9;
 
+	private DatabaseHelper mHelper;
+	
 	private static HashMap<String, String> CHANNEL_LIST_PROJECTION_MAP;
 	private static HashMap<String, String> POST_LIST_PROJECTION_MAP;
 
@@ -69,6 +70,10 @@ public class RSSReaderProvider extends ContentProvider
 
 	private static class DatabaseHelper extends SQLiteOpenHelper
 	{
+		public DatabaseHelper(Context ctx) {
+			super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
+		}
+		
 		protected void onCreateChannels(SQLiteDatabase db)
 		{
 			db.execSQL("CREATE TABLE rssreader_channel (_id INTEGER PRIMARY KEY," +
@@ -121,10 +126,9 @@ public class RSSReaderProvider extends ContentProvider
 	@Override
 	public boolean onCreate()
 	{
-		DatabaseHelper dbHelper = new DatabaseHelper();
-		mDB = dbHelper.openDatabase(getContext(), DATABASE_NAME, null, DATABASE_VERSION);
+		mHelper = new DatabaseHelper(getContext());
 		
-		return (mDB == null) ? false : true;
+		return true;
 	}
 	
 	@Override
@@ -266,7 +270,7 @@ public class RSSReaderProvider extends ContentProvider
 			}
 			else
 			{
-				modeint = ParcelFileDescriptor.MODE_READ;
+				modeint = ParcelFileDescriptor.MODE_READ_ONLY;
 				
 				if (file.exists() == false)
 				{
