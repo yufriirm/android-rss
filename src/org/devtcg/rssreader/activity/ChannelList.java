@@ -344,7 +344,7 @@ public class ChannelList extends ListActivity
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent)
 		{
-			ChannelListRow row = new ChannelListRow(context);
+			ChannelListRow row = new ChannelListRow(context, parent);
 			row.bindView(cursor);
 			updateRowMap(cursor, row);
 			return row;
