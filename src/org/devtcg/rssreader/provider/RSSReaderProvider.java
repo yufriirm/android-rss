@@ -127,7 +127,7 @@ public class RSSReaderProvider extends ContentProvider
 	public boolean onCreate()
 	{
 		mHelper = new DatabaseHelper(getContext());
-		
+		mHelper.onCreate(mDB);
 		return true;
 	}
 	
