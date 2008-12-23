@@ -153,7 +153,8 @@ public class PostListRow extends ViewGroup
 		else
 			mSubject.setTypeface(Typeface.DEFAULT_BOLD);
 
-		mSubject.setText(cursor, cursor.getColumnIndex(RSSReader.Posts.TITLE));
+		String title = cursor.getString(cursor.getColumnIndex(RSSReader.Posts.TITLE));
+		mSubject.setText(title);
 
 		String datestr = cursor.getString(cursor.getColumnIndex(RSSReader.Posts.DATE));
 

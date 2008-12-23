@@ -30,7 +30,7 @@ import android.net.Uri;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewInflate;
+import android.view.LayoutInflater;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -55,7 +55,7 @@ public class ChannelListRow extends RelativeLayout
 
 		setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 
-		View view = ViewInflate.from(getContext()).inflate(R.layout.channel_list_item, null, false, null);
+		View view = LayoutInflater.from(getContext()).inflate(R.layout.channel_list_item, null, false);
 
 		mIcon = (ImageView)view.findViewById(R.id.channel_icon);
 		mName = (TextView)view.findViewById(R.id.channel_name);
@@ -128,7 +128,7 @@ public class ChannelListRow extends RelativeLayout
 
 		Typeface tf;
 
-		int unreadCount = unread.count();
+		int unreadCount = unread.getCount();
 		unread.close();
 
 		if (unreadCount > 0)
@@ -142,7 +142,9 @@ public class ChannelListRow extends RelativeLayout
 		mIcon.setImageURI(Uri.parse(icon));
 
 		mName.setTypeface(Typeface.DEFAULT);
-		mName.setText(cursor, cursor.getColumnIndex(RSSReader.Channels.TITLE));
+		
+		String title = cursor.getString(cursor.getColumnIndex(RSSReader.Channels.TITLE));
+		mName.setText(title);
 
 		mCount.setTypeface(tf);
 		mCount.setText(new Integer(unreadCount).toString());
@@ -178,10 +180,10 @@ public class ChannelListRow extends RelativeLayout
 		
 		/* Hmm, they must have deleted this channel while we were
 		 * refreshing?  OK, we can deal... */
-		if (cursor.count() < 1)
+		if (cursor.getCount() < 1)
 			return;
 		
-		cursor.first();
+		cursor.isFirst();
 		finishRefresh(cursor);
 		cursor.close();
 	}
