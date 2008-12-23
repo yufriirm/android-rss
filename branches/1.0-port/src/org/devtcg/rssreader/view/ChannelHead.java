@@ -60,9 +60,9 @@ public class ChannelHead extends LinearLayout
 		init(context);
 	}
 
-	public ChannelHead(Context context, AttributeSet attrs, Map inflateParams)
+	public ChannelHead(Context context, AttributeSet attrs)
 	{
-		super(context, attrs, inflateParams);
+		super(context, attrs);
 		init(context);
 	}
 
