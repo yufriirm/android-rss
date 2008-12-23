@@ -47,9 +47,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 public class RSSReaderProvider extends ContentProvider
-{
-	private SQLiteDatabase mDB;
-	
+{	
 	private static final String TAG = "RSSReaderProvider";
 	private static final String DATABASE_NAME = "rss_reader.db";
 	private static final int DATABASE_VERSION = 9;
@@ -127,7 +125,6 @@ public class RSSReaderProvider extends ContentProvider
 	public boolean onCreate()
 	{
 		mHelper = new DatabaseHelper(getContext());
-		mHelper.onCreate(mDB);
 		return true;
 	}
 	
@@ -182,7 +179,8 @@ public class RSSReaderProvider extends ContentProvider
 		else
 			orderBy = sort;
 
-		Cursor c = qb.query(mDB, projection, selection, selectionArgs,
+		SQLiteDatabase db = mHelper.getReadableDatabase();
+		Cursor c = qb.query(db, projection, selection, selectionArgs,
 				null, null, orderBy);
 
 		c.setNotificationUri(getContext().getContentResolver(), url);
@@ -294,7 +292,7 @@ public class RSSReaderProvider extends ContentProvider
 		}
 	}
 	
-	private long insertChannels(ContentValues values)
+	private long insertChannels(SQLiteDatabase db, ContentValues values)
 	{
 		Resources r = Resources.getSystem();
 
@@ -302,7 +300,7 @@ public class RSSReaderProvider extends ContentProvider
 		if (values.containsKey(RSSReader.Channels.TITLE) == false)
 			values.put(RSSReader.Channels.TITLE, r.getString(android.R.string.untitled));
 
-		long id = mDB.insert("rssreader_channel", "title", values);
+		long id = db.insert("rssreader_channel", "title", values);
 
 		if (values.containsKey(RSSReader.Channels.ICON) == false)
 		{
@@ -316,21 +314,22 @@ public class RSSReaderProvider extends ContentProvider
 			/* LAME! */
 			ContentValues update = new ContentValues();
 			update.put(RSSReader.Channels.ICON, iconUri.toString());
-			mDB.update("rssreader_channel", update, "_id=" + id, null);
+			db.update("rssreader_channel", update, "_id=" + id, null);
 		}
 
 		return id;
 	}
 
-	private long insertPosts(ContentValues values)
+	private long insertPosts(SQLiteDatabase db, ContentValues values)
 	{
 		/* TODO: Validation? */
-		return mDB.insert("rssreader_post", "title", values);
+		return db.insert("rssreader_post", "title", values);
 	}
 
 	@Override
 	public Uri insert(Uri url, ContentValues initialValues)
 	{
+		SQLiteDatabase db = mHelper.getWritableDatabase();
 		long rowID;
 		ContentValues values;
 
@@ -343,12 +342,12 @@ public class RSSReaderProvider extends ContentProvider
 		
 		if (URL_MATCHER.match(url) == CHANNELS)
 		{
-			rowID = insertChannels(values);
+			rowID = insertChannels(db, values);
 			uri = ContentUris.withAppendedId(RSSReader.Channels.CONTENT_URI, rowID);
 		}
 		else if (URL_MATCHER.match(url) == POSTS)
 		{
-			rowID = insertPosts(values);
+			rowID = insertPosts(db, values);
 			uri = ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI, rowID);
 		}
 		else
@@ -369,27 +368,28 @@ public class RSSReaderProvider extends ContentProvider
 	@Override
 	public int delete(Uri url, String where, String[] whereArgs)
 	{
+		SQLiteDatabase db = mHelper.getWritableDatabase();
 		int count;
 		String myWhere;
 		
 		switch (URL_MATCHER.match(url))
 		{
 		case CHANNELS:
-			count = mDB.delete("rssreader_channel", where, whereArgs);
+			count = db.delete("rssreader_channel", where, whereArgs);
 			break;
 			
 		case CHANNEL_ID:
 			myWhere = "_id=" + url.getPathSegments().get(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
-			count = mDB.delete("rssreader_channel", myWhere, whereArgs);
+			count = db.delete("rssreader_channel", myWhere, whereArgs);
 			break;
 			
 		case POSTS:
-			count = mDB.delete("rssreader_post", where, whereArgs);
+			count = db.delete("rssreader_post", where, whereArgs);
 			break;
 			
 		case POST_ID:
 			myWhere = "_id=" + url.getPathSegments().get(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
-			count = mDB.delete("rssreader_post", myWhere, whereArgs);
+			count = db.delete("rssreader_post", myWhere, whereArgs);
 			break;
 			
 		default:
@@ -403,27 +403,28 @@ public class RSSReaderProvider extends ContentProvider
 	@Override
 	public int update(Uri url, ContentValues values, String where, String[] whereArgs)
 	{
+		SQLiteDatabase db = mHelper.getWritableDatabase();
 		int count;
 		String myWhere;
 		
 		switch (URL_MATCHER.match(url))
 		{
 		case CHANNELS:
-			count = mDB.update("rssreader_channel", values, where, whereArgs);
+			count = db.update("rssreader_channel", values, where, whereArgs);
 			break;
 			
 		case CHANNEL_ID:
 			myWhere = "_id=" + url.getPathSegments().get(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
-			count = mDB.update("rssreader_channel", values, myWhere, whereArgs);
+			count = db.update("rssreader_channel", values, myWhere, whereArgs);
 			break;
 			
 		case POSTS:
-			count = mDB.update("rssreader_post", values, where, whereArgs);
+			count = db.update("rssreader_post", values, where, whereArgs);
 			break;
 			
 		case POST_ID:
 			myWhere = "_id=" + url.getPathSegments().get(1) + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : "");			
-			count = mDB.update("rssreader_post", values, myWhere, whereArgs);
+			count = db.update("rssreader_post", values, myWhere, whereArgs);
 			break;
 			
 		default:
