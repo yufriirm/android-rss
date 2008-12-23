@@ -31,13 +31,13 @@ public class ReaderService extends Service implements Runnable
 	private static final String TAG = "RSSReaderService";
 	
 	@Override
-	protected void onCreate()
+	public void onCreate()
 	{
 		Log.d(TAG, "onCreate");
 	}
 	
 	@Override
-	protected void onStart(int startId, Bundle args)
+	public void onStart(Intent intent, int startId)
 	{
 		Log.d(TAG, "onStart(" + startId + ")");
 		
@@ -48,7 +48,7 @@ public class ReaderService extends Service implements Runnable
 	}
 	
 	@Override
-	protected void onDestroy()
+	public void onDestroy()
 	{
 		/* TODO: Do something? */
 		Log.d(TAG, "onDestroy");
