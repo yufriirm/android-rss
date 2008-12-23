@@ -110,23 +110,24 @@ public class ChannelAdd extends Activity
 
 		mBusy = ProgressDialog.show(ChannelAdd.this,
 		  "Downloading", "Accessing XML feed...", true, false);
-
+		
 		Thread t = new Thread()
 		{
 			public void run()
 			{
 				try
-				{
+				{					
 					ChannelRefresh refresh = new ChannelRefresh(getContentResolver());
 
 					final long id = refresh.syncDB(null, -1, rssurl);
+					Log.d("RSS - Channel Add", "Running the channel add thread. ID: " + id);
 					
 					if (id >= 0)
 					{
 						URL iconurl = getDefaultFavicon(rssurl);
 						refresh.updateFavicon(id, iconurl);
 					}
-
+					
 			    	mHandler.post(new Runnable() {
 			    		public void run()
 			    		{
@@ -134,6 +135,7 @@ public class ChannelAdd extends Activity
 			    			
 			    			Uri uri = ContentUris.withAppendedId(RSSReader.Channels.CONTENT_URI, id);
 			    			getIntent().setData(uri);
+			    			Log.d("RSS - ChannelAdd", "Uri value: " + uri.toString());
 			    			setResult(RESULT_OK, getIntent());
 			    			finish();
 			    		}
@@ -141,6 +143,7 @@ public class ChannelAdd extends Activity
 				}
 				catch(Exception e)
 				{
+					Log.d("::Exception::", e.toString());
 					final String errmsg = e.getMessage();
 					final String errmsgFull = e.toString();
 

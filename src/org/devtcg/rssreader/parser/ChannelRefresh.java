@@ -122,7 +122,7 @@ public class ChannelRefresh extends DefaultHandler
 		URL url = new URL(mRSSURL);
 		
 		URLConnection c = url.openConnection();
-		c.setRequestProperty("User-Agent", "Android/m3-rc37a");
+		c.setRequestProperty("User-Agent", "Android/1.0");
 		xr.parse(new InputSource(c.getInputStream()));
 
 		return mID;
@@ -184,16 +184,18 @@ public class ChannelRefresh extends DefaultHandler
 	public void startElement(String uri, String name, String qName,
 			Attributes attrs)
 	{
+		Log.d("XMLParse", "the tag name is: " + name);
+	
 		/* HACK: when we see <title> outside of an <item>, assume it's the
 		 * feed title.  Only do this when we are inserting a new feed. */
 		if (mID == -1 &&
-		    qName.equals("title") && (mState & STATE_IN_ITEM) == 0)
+		    name.equals("title") && (mState & STATE_IN_ITEM) == 0)
 		{
 			mState |= STATE_IN_TITLE;
 			return;
 		}
 
-		Integer state = mStateMap.get(qName);
+		Integer state = mStateMap.get(name);
 
 		if (state != null)
 		{
@@ -213,7 +215,7 @@ public class ChannelRefresh extends DefaultHandler
 
 	public void endElement(String uri, String name, String qName)
 	{
-		Integer state = mStateMap.get(qName);
+		Integer state = mStateMap.get(name);
 
 		if (state != null)
 		{
@@ -250,6 +252,7 @@ public class ChannelRefresh extends DefaultHandler
 					values.put(RSSReader.Posts.DATE, mPostBuf.getDate());
 					values.put(RSSReader.Posts.BODY, mPostBuf.desc);
 
+					Log.d("ChannelRefresh", "Inserting new channel: " + mID);
 					mContent.insert(RSSReader.Posts.CONTENT_URI, values);
 				}
 
@@ -271,6 +274,8 @@ public class ChannelRefresh extends DefaultHandler
 			Uri added =
 			  mContent.insert(RSSReader.Channels.CONTENT_URI, values);
 
+			Log.d("Channel Insert", "Uri added is: " + added.toString());
+				
 			mID = Long.parseLong(added.getPathSegments().get(1));
 
 			/* There's no reason we need to do this ever, but we'll just be
