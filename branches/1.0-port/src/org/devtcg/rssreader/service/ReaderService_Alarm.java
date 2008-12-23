@@ -19,13 +19,13 @@ package org.devtcg.rssreader.service;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentReceiver;
+import android.content.BroadcastReceiver;
 
-public class ReaderService_Alarm extends IntentReceiver
+public class ReaderService_Alarm extends BroadcastReceiver
 {
 	@Override
-	public void onReceiveIntent(Context context, Intent intent)
+	public void onReceive(Context context, Intent intent)
 	{
-		context.startService(new Intent(context, ReaderService.class), null);
+		context.startService(new Intent(context, ReaderService.class));
 	}
 }
