@@ -20,6 +20,7 @@ import org.devtcg.rssreader.R;
 import org.devtcg.rssreader.provider.RSSReader;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -52,7 +53,7 @@ public class ChannelEdit extends Activity
 		super.onCreate(icicle);
 				
 		mURI = getIntent().getData();
-		mCursor = managedQuery(mURI, PROJECTION, null, null);
+		mCursor = managedQuery(mURI, PROJECTION, null, null, null);
 
 		setContentView(R.layout.channel_edit);
 		
@@ -71,10 +72,12 @@ public class ChannelEdit extends Activity
 		if (mCursor == null)
 			return;
 
-		mCursor.first();
+		mCursor.isFirst();
 		
-		mURLText.setText(mCursor, URL_INDEX);
-		mTitleText.setText(mCursor, TITLE_INDEX);
+		String url = mCursor.getString(URL_INDEX);
+		String title = mCursor.getString(TITLE_INDEX);
+		mURLText.setText(url);
+		mTitleText.setText(title);
 	}
 	
 	@Override
@@ -86,7 +89,7 @@ public class ChannelEdit extends Activity
 			return;
 
 		updateProvider();
-		managedCommitUpdates(mCursor);
+		//managedCommitUpdates(mCursor);
 	}
 
 	private void updateProvider()
@@ -94,8 +97,10 @@ public class ChannelEdit extends Activity
 		if (mCursor == null)
 			return;
 
-		mCursor.updateString(URL_INDEX, mURLText.getText().toString());
-		mCursor.updateString(TITLE_INDEX, mTitleText.getText().toString());
+		ContentValues values = new ContentValues();
+		values.put(RSSReader.Channels.URL, mURLText.getText().toString());
+		values.put(RSSReader.Channels.TITLE, mTitleText.getText().toString());
+		getContentResolver().update(getIntent().getData(), values, null, null);
 	}
 
 	private OnClickListener mSaveListener = new OnClickListener()
@@ -103,9 +108,9 @@ public class ChannelEdit extends Activity
 		public void onClick(View v)
 		{
 			updateProvider();
-			mCursor.commitUpdates();
+			//mCursor.commitUpdates();
 			
-			setResult(RESULT_OK, mURI.toString());
+			setResult(RESULT_OK, getIntent());
 			finish();
 		}
 	};

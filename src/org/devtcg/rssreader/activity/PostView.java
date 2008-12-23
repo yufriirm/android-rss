@@ -24,12 +24,14 @@ import org.devtcg.rssreader.view.ChannelHead;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
 
@@ -67,7 +69,7 @@ public class PostView extends Activity
 
 		mCursor = managedQuery(uri, PROJECTION, null, null, null);
 
-		if (mCursor == null || mCursor.first() == false)
+		if (mCursor == null || mCursor.isFirst() == false)
 			finish();
 
 		mChannelID = mCursor.getLong(mCursor.getColumnIndex(RSSReader.Posts.CHANNEL_ID));
@@ -82,12 +84,13 @@ public class PostView extends Activity
 	{
 		super.onStart();
 
-		if (mCursor == null || mCursor.first() == false)
+		if (mCursor == null || mCursor.isFirst() == false)
 			return;
 
 		/* Set the post to read. */
-		mCursor.updateInt(mCursor.getColumnIndex(RSSReader.Posts.READ), 1);
-		mCursor.commitUpdates();
+		ContentValues values = new ContentValues();
+		values.put(RSSReader.Posts.READ, 1);
+		getContentResolver().update(getIntent().getData(), values, null, null);
 	}
 
 	private void initWithData()
@@ -97,8 +100,8 @@ public class PostView extends Activity
 		Cursor cChannel = cr.query(ContentUris.withAppendedId(RSSReader.Channels.CONTENT_URI, mChannelID),
 		  new String[] { RSSReader.Channels.ICON, RSSReader.Channels.LOGO, RSSReader.Channels.TITLE }, null, null, null);
 
-		assert(cChannel.count() == 1);
-		cChannel.first();
+		assert(cChannel.getCount() == 1);
+		cChannel.isFirst();
 
 		/* Make the view useful. */
 		ChannelHead head = (ChannelHead)findViewById(R.id.postViewHead);
@@ -108,7 +111,9 @@ public class PostView extends Activity
 		cChannel.close();
 
 		TextView postTitle = (TextView)findViewById(R.id.postTitle);
-		postTitle.setText(mCursor, mCursor.getColumnIndex(RSSReader.Posts.TITLE));
+		
+		String title = mCursor.getString(mCursor.getColumnIndex(RSSReader.Posts.TITLE));
+		postTitle.setText(title);
 
 		WebView postText = (WebView)findViewById(R.id.postText);
 
@@ -178,13 +183,13 @@ public class PostView extends Activity
 	    	/* TODO: This is super lame; we need to use SQLite queries to
 	    	 * determine posts either newer or older than the current one
 	    	 * without. */
-	    	cPostList.first();
+	    	cPostList.isFirst();
 	    	
 	    	int indexId = cPostList.getColumnIndex(RSSReader.Posts._ID);
 	    	
 	    	long lastId = -1;
 	    	
-	    	for (cPostList.first(); cPostList.isLast() == false; cPostList.next())
+	    	for (cPostList.isFirst(); cPostList.isLast() == false; cPostList.moveToNext())
 	    	{
 	    		long thisId = cPostList.getLong(indexId);
 	    		
@@ -202,7 +207,7 @@ public class PostView extends Activity
 	    	{
 	    		if (cPostList.isLast() == false)
 	    		{
-	    			cPostList.next();
+	    			cPostList.moveToNext();
 	    			mPrevPostID = cPostList.getLong(indexId);
 	    		}
 	    	}
@@ -218,16 +223,16 @@ public class PostView extends Activity
 
 		if (mNextPostID >= 0)
 		{
-			menu.add(0, NEXT_POST_ID, "Newer Post").
+			menu.add(0, NEXT_POST_ID, 0, "Newer Post").
   	  	  	  setShortcut('1', '[');
 		}
     	
 		if (mPrevPostID >= 0)
 		{
-			menu.add(0, PREV_POST_ID, "Older Post").
+			menu.add(0, PREV_POST_ID, 0, "Older Post").
 			  setShortcut('3', ']');
 			
-			menu.setDefaultItem(PREV_POST_ID);
+			//menu.setDefaultItem(PREV_POST_ID);
 		}
 		
 		return true;
@@ -235,7 +240,7 @@ public class PostView extends Activity
 	
 	private void moveTo(long id)
 	{
-		Intent intent = new Intent(Intent.VIEW_ACTION,
+		Intent intent = new Intent(Intent.ACTION_VIEW,
 		  ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI, id));
 		
 		startActivity(intent);
@@ -264,9 +269,9 @@ public class PostView extends Activity
 	}
 
     @Override
-    public boolean onOptionsItemSelected(Menu.Item item)
+    public boolean onOptionsItemSelected(MenuItem item)
     {
-    	switch (item.getId())
+    	switch (item.getItemId())
     	{
     	case PREV_POST_ID:
     		return prevPost();
