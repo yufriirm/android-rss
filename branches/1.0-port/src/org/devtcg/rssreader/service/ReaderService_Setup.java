@@ -18,18 +18,19 @@ package org.devtcg.rssreader.service;
 
 
 import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentReceiver;
+import android.content.BroadcastReceiver;
 import android.os.SystemClock;
 import android.util.Log;
 
-public class ReaderService_Setup extends IntentReceiver
+public class ReaderService_Setup extends BroadcastReceiver
 {
 	public static final String TAG = "RSSReaderService_Setup";
 
 	@Override
-	public void onReceiveIntent(Context context, Intent intent)
+	public void onReceive(Context context, Intent intent)
 	{
 		Log.d(TAG, "onReceiveIntent");		
 		setupAlarm(context);
@@ -46,7 +47,8 @@ public class ReaderService_Setup extends IntentReceiver
 		long interval = 50 * 1000;
 
 		AlarmManager amStart = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+		PendingIntent pIntent = PendingIntent.getService(context, 0, start, 0);
 		amStart.setRepeating(AlarmManager.ELAPSED_REALTIME,
-		  SystemClock.elapsedRealtime() + interval, interval, start);
+		  SystemClock.elapsedRealtime() + interval, interval, pIntent);
 	}
 }
