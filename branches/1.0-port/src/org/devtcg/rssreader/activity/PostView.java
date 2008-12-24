@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -56,7 +57,7 @@ public class PostView extends Activity
 	private long mNextPostID = -1;
 	
 	@Override
-	protected void onCreate(Bundle icicle)
+	public void onCreate(Bundle icicle)
 	{
 		super.onCreate(icicle);		
 		setContentView(R.layout.post_view);
@@ -72,6 +73,7 @@ public class PostView extends Activity
 		if (mCursor == null || mCursor.isFirst() == false)
 			finish();
 
+		mCursor.moveToNext();
 		mChannelID = mCursor.getLong(mCursor.getColumnIndex(RSSReader.Posts.CHANNEL_ID));
 		mPostID = Long.parseLong(uri.getPathSegments().get(1));
 
@@ -80,7 +82,7 @@ public class PostView extends Activity
 	}
 
 	@Override
-	protected void onStart()
+	public void onStart()
 	{
 		super.onStart();
 
@@ -103,6 +105,7 @@ public class PostView extends Activity
 		assert(cChannel.getCount() == 1);
 		cChannel.isFirst();
 
+		cChannel.moveToNext();
 		/* Make the view useful. */
 		ChannelHead head = (ChannelHead)findViewById(R.id.postViewHead);
 		head.setLogo(cChannel);
@@ -125,6 +128,8 @@ public class PostView extends Activity
 		  "</body></html>";
 
 		postText.loadData(html, "text/html", "utf-8");
+		
+		Log.d("RSSReader - Debug", "Hit the end of the initWithData method");
 	}
 	
 	/* Apply some simple heuristics to the post text to determine what special
