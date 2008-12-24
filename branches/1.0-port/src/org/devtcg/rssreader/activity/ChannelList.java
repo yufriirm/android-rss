@@ -257,6 +257,9 @@ public class ChannelList extends ListActivity
     	if (item.getTitle().equals("Remove"))
     		deleteChannel(menuInfo.id);
     	
+    	if (item.getTitle().equals("Refresh"))
+    		refreshChannel();
+    	
     	return false;
     }
 
