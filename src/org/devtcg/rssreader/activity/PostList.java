@@ -72,7 +72,7 @@ public class PostList extends ListActivity
 		ListAdapter adapter = new PostListAdapter(this, mCursor);
         setListAdapter(adapter);
         
-        //initWithData();
+        initWithData();
 	}
 
 	private void initWithData()
@@ -86,6 +86,7 @@ public class PostList extends ListActivity
 		assert(cChannel.getCount() == 1);
 		cChannel.isFirst();
 
+		cChannel.moveToNext();
 		/* TODO: Check if RSSReader.Channels.LOGO exists and use it. */
 		ChannelHead head = (ChannelHead)findViewById(R.id.postListHead);
 		head.setLogo(cChannel);
