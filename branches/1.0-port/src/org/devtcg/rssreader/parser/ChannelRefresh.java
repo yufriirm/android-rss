@@ -242,6 +242,8 @@ public class ChannelRefresh extends DefaultHandler
 
 				Log.d(TAG, "Post: " + mPostBuf.title);
 
+				Log.d("ChannelRefresh", mPostBuf.desc);
+
 				if (dup.getCount() == 0)
 				{
 					ContentValues values = new ContentValues();
@@ -300,7 +302,7 @@ public class ChannelRefresh extends DefaultHandler
 			mPostBuf.title = new String(ch, start, length);
 			break;
 		case STATE_IN_ITEM | STATE_IN_ITEM_DESC:
-			mPostBuf.desc = new String(ch, start, length);
+			mPostBuf.desc += new String(ch, start, length);
 			break;
 		case STATE_IN_ITEM | STATE_IN_ITEM_LINK:
 			mPostBuf.link = new String(ch, start, length);
@@ -321,13 +323,14 @@ public class ChannelRefresh extends DefaultHandler
 	{
 		public String title;
 		public Date date;
-		public String desc;
+		public String desc = new String();
 		public String link;
 		public String author;
 
 		public ChannelPost()
 		{
 			/* Empty. */
+			desc = new String();
 		}
 
 		public void setDate(String str)

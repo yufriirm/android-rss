@@ -117,6 +117,7 @@ public class PostView extends Activity
 		  "</body></html>";
 
 		Log.d("RSSReader Debug", "Contents of the feed article: " + getBody());
+		//postText.loadUrl(mCursor.getString(mCursor.getColumnIndex(RSSReader.Posts.URL)));
 		postText.loadData(getBody(), "text/html", "utf-8");		
 	}
 	
