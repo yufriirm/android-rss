@@ -47,6 +47,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 
+/** TODO: this class needs lots of work, content of some feeds is getting all messed up, no good. **/
 public class ChannelRefresh extends DefaultHandler
 {
 	private static final String TAG = "RSSChannelRefresh";
