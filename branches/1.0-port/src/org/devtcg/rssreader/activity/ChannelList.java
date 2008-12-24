@@ -34,10 +34,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.Filterable;
 import android.widget.ListAdapter;
@@ -104,6 +107,8 @@ public class ChannelList extends ListActivity
 
         ListAdapter adapter = new ChannelListAdapter(this, mCursor);
         setListAdapter(adapter);
+        
+        registerForContextMenu(getListView());
     }
 
     @Override
@@ -233,25 +238,37 @@ public class ChannelList extends ListActivity
 
     	return super.onOptionsItemSelected(item);
     }
+    
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo info) {
+    	menu.setHeaderTitle("Feed Options");
+    	menu.setHeaderIcon(R.drawable.feedicon);
+    	
+    	menu.add("Refresh");
+    	menu.add("Remove");
+    }
+    
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+    	Log.d("ChannelList Debug", "Context menu selected.");
+    	
+    	AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+    	Log.d("ChannelList Debug", "menuinfo.id = " + menuInfo.id);
+    	
+    	if (item.getTitle().equals("Remove"))
+    		deleteChannel(menuInfo.id);
+    	
+    	return false;
+    }
 
-//    private final void deleteChannel()
-//    {
-//    	long channelId = getSelectionRowID();
-//
-////    	Thread refresh;
-////
-////    	if (mRefreshThreads != null &&
-////    	    (refresh = mRefreshThreads.remove(channelId)) != null)
-////    	{
-////    		/* TODO: Stop the thread. */
-////    	}
-//
-//		/* Delete related posts. */
-//		getContentResolver().delete(RSSReader.Posts.CONTENT_URI,
-//    	  "channel_id=?", new String[] { String.valueOf(channelId) });
-//
-//		mCursor.deleteRow();
-//    }
+    private final void deleteChannel(long channelId)
+    {
+    	/* Delete related posts. */
+    	getContentResolver().delete(RSSReader.Posts.CONTENT_URI,
+    			"channel_id=?", new String[] { String.valueOf(channelId) });
+
+    	getContentResolver().delete(RSSReader.Channels.CONTENT_URI,
+    			"_id=?", new String[] { String.valueOf(channelId) });
+    }
 
     private final void refreshAllChannels()
     {
