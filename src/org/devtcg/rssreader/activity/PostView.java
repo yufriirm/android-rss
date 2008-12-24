@@ -117,8 +117,7 @@ public class PostView extends Activity
 		  "</body></html>";
 
 		Log.d("RSSReader Debug", "Contents of the feed article: " + getBody());
-		postText.loadData(getBody(), "text/html", "utf-8");
-		
+		postText.loadData(getBody(), "text/html", "utf-8");		
 	}
 	
 	/* Apply some simple heuristics to the post text to determine what special
@@ -127,6 +126,8 @@ public class PostView extends Activity
 	{
 		String body =
 		  mCursor.getString(mCursor.getColumnIndex(RSSReader.Posts.BODY));
+		
+		Log.d("RSSReader Debug", "Contents of the database: " + body);
 		
 		String url =
 		  mCursor.getString(mCursor.getColumnIndex(RSSReader.Posts.URL));
