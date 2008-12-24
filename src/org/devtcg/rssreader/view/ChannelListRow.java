@@ -186,6 +186,7 @@ public class ChannelListRow extends LinearLayout
 			return;
 		
 		cursor.isFirst();
+		cursor.moveToNext();
 		finishRefresh(cursor);
 		cursor.close();
 	}
