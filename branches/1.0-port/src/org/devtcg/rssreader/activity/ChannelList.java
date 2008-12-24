@@ -204,7 +204,6 @@ public class ChannelList extends ListActivity
     		Uri uri = 
     		  ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI_LIST, id);
     		
-    		Log.d("ChannelListDebug", "Querying for all items in: " + uri.toString());
     		startActivity(new Intent(Intent.ACTION_VIEW, uri));
     	}
     }

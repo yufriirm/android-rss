@@ -20,34 +20,32 @@
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content">
 	
-	<view class="org.devtcg.rssreader.view.ChannelHead" android:id="@+id/postViewHead"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content" />
-    
-	<ScrollView
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content">
-    
-	    <LinearLayout
-	    	android:orientation="vertical"
+		<view class="org.devtcg.rssreader.view.ChannelHead" android:id="@+id/postViewHead"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
+		
+		<ScrollView
 	    	android:layout_width="fill_parent"
-	    	android:layout_height="fill_parent">
-
-			<TextView android:id="@+id/postTitle"
-			    android:layout_width="fill_parent" 
-			    android:layout_height="wrap_content" 
-			    android:textStyle="bold"
-			    android:paddingLeft="8px"
-			    android:paddingRight="8px"
-			    />
+	    	android:layout_height="wrap_content">
+    
+	    	<LinearLayout
+	    		android:orientation="vertical"
+	    		android:layout_width="fill_parent"
+	    		android:layout_height="fill_parent">
+	    		
+				<TextView android:id="@+id/postTitle"
+			    	android:layout_width="fill_parent" 
+			    	android:layout_height="wrap_content" 
+			    	android:textStyle="bold"
+			    	android:paddingLeft="8px"
+			    	android:paddingRight="8px" />
 		   
-			<WebView android:id="@+id/postText"
-				android:layout_width="fill_parent"
-				android:layout_height="fill_parent"
-				/>
-			
-		</LinearLayout>
-	
-	</ScrollView>
+				<WebView android:id="@+id/postText"
+					android:layout_width="fill_parent"
+					android:layout_height="fill_parent" />
+				
+			</LinearLayout>
+		
+		</ScrollView>
 	
 </LinearLayout>

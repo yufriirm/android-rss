@@ -99,19 +99,8 @@ public class PostList extends ListActivity
     {
 		Uri uri = 
 		  ContentUris.withAppendedId(RSSReader.Posts.CONTENT_URI, id);
-    	String action = getIntent().getAction();
-    	
-    	if (action.equals(Intent.ACTION_PICK) ||
-    	    action.equals(Intent.ACTION_GET_CONTENT))
-    	{
-    		Intent intent = getIntent();
-    		intent.setData(uri);
-    		setResult(RESULT_OK, intent);
-    	}
-    	else
-    	{
-    		startActivity(new Intent(Intent.ACTION_VIEW, uri));
-    	}
+		
+    	startActivity(new Intent(Intent.ACTION_VIEW, uri));
     }
     
     @Override
